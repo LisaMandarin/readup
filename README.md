@@ -57,3 +57,6 @@ When both frontend and backend are running, the **â€œCall Backend Health Checkâ€
 - Frontend instructions: see `frontend/README.md`
 - Backend instructions: see `backend/README.md`
 
+## Favorite Quotes
+
+- If you fail to plan, you plan to fail.
