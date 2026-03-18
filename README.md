@@ -60,3 +60,5 @@ When both frontend and backend are running, the **â€œCall Backend Health Checkâ€
 ## Favorite Quotes
 
 - If you fail to plan, you plan to fail.
+
+- As long as Oluwa is involved. #oluwatigboalao11
