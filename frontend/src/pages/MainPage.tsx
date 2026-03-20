@@ -7,7 +7,7 @@ export default function MainPage() {
   return (
     <ConfigProvider>
       <div className='flex flex-col px-6 py-6 min-h-screen justify-between'>
-        <div>
+        <div className='border-4 border-[var(--card-border)] rounded-lg p-4'>
           {/* welcome message */}
           <div className='mb-4'>
             <p className='m-0 text-sm'>Welcome, testuser</p>
@@ -16,7 +16,7 @@ export default function MainPage() {
 
           {/* Application introduction */}
           <h1 className='text-4xl font-extrabold text-center m-4'>Read Up</h1>
-          <p>Turn any text into an interactive learning experience — translate, explore vocabulary, and truly understand what you read.</p>
+          <p className='text-center'>Turn any text into an interactive learning experience — translate, explore vocabulary, and truly understand what you read.</p>
           
           {/* Textarea for passage */}
           <Card
