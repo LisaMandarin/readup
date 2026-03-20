@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Button, Card, ConfigProvider, Input, Space } from 'antd'
+import { ConfigProvider } from 'antd'
+
+import Passage from './Passage'
 
 export default function MainPage() {
   const [passage, setPassage] = useState('')
@@ -18,25 +20,11 @@ export default function MainPage() {
           <h1 className='text-4xl font-extrabold text-center m-4'>Read Up</h1>
           <p className='text-center'>Turn any text into an interactive learning experience — translate, explore vocabulary, and truly understand what you read.</p>
           
-          {/* Textarea for passage */}
-          <Card
-            className='mt-4'
-            style={{
-              background: 'var(--card-bg)',
-            }}
-          >
-            <Input.TextArea
-              rows={5}
-              value={passage}
-              onChange={(event) => setPassage(event.target.value)}
-              placeholder='Enter the passage you want to translate'
-            />
-
-            <Space className='mt-4'>
-              <Button type='primary'>Translation</Button>
-              <Button onClick={() => setPassage('')}>Clear</Button>
-            </Space>
-          </Card>
+          <Passage
+            passage={passage}
+            onPassageChange={setPassage}
+            onClear={() => setPassage('')}
+          />
 
         </div>
         <footer className="px-6 py-4 text-center text-gray-500">
