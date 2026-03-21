@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { ConfigProvider } from 'antd'
-import { AuthProvider } from './context/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
-import SignIn from './pages/SignIn'
-import SignUp from './pages/SignUp'
-import SignOut from './pages/SignOut'
-import Home from './pages/Home'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ConfigProvider } from "antd";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import SignOut from "./pages/SignOut";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
 
-            {/* Sign-out confirmation page */}
+            {/* Sign-out page (needs token to show confirmation) */}
             <Route path="/signout" element={<SignOut />} />
 
             {/* Protected routes */}
@@ -36,7 +36,7 @@ function App() {
         </BrowserRouter>
       </AuthProvider>
     </ConfigProvider>
-  )
+  );
 }
 
-export default App
+export default App;

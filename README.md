@@ -62,3 +62,5 @@ When both frontend and backend are running, the **â€œCall Backend Health Checkâ€
 - If you fail to plan, you plan to fail.
 
 - As long as Oluwa is involved. #oluwatigboalao11
+
+- "The most important step a man can take is always the next one" - Dallinar Kholin
