@@ -1,6 +1,7 @@
 # ReadUp Backend (FastAPI)
 
 This backend is built with **FastAPI** and served using **Uvicorn**.
+It connects to **Supabase** (PostgreSQL) for data storage.
 
 ## Setup
 
@@ -8,6 +9,7 @@ From the `backend` directory:
 
 ```bash
 cd backend
+cp .env.example .env        
 pip install -r requirements.txt
 ```
 
