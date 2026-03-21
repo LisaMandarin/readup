@@ -1,104 +1,65 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button, Layout, Menu, message, theme } from "antd";
-import { LogoutOutlined } from "@ant-design/icons";
-import { useAuth } from "../context/AuthContext";
-import { healthCheckRequest } from "../api/auth";
-
-const { Header, Content, Footer } = Layout;
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ConfigProvider, Button } from 'antd'
+import { LogoutOutlined } from '@ant-design/icons'
+import { useAuth } from '../context/AuthContext'
+import Passage from './Passage'
 
 export default function Home() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const [healthStatus, setHealthStatus] = useState<string | null>(null);
-  const [checkingHealth, setCheckingHealth] = useState(false);
-
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [passage, setPassage] = useState('')
 
   const handleSignOut = () => {
-    navigate("/signout");
-  };
-
-  const callHealthCheck = async () => {
-    try {
-      setCheckingHealth(true);
-      setHealthStatus(null);
-      const { data } = await healthCheckRequest();
-      setHealthStatus(data.status ?? "unknown");
-    } catch (error) {
-      setHealthStatus("error");
-      console.error("Health check failed", error);
-    } finally {
-      setCheckingHealth(false);
-    }
-  };
+    navigate('/signout')
+  }
 
   return (
-    <Layout className="min-h-screen">
-      <Header className="flex items-center justify-between">
-        <div className="flex items-center">
-          <div className="text-white text-xl font-semibold mr-8">ReadUp</div>
-          <Menu
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={["home"]}
-            items={[{ key: "home", label: "Home" }]}
-          />
-        </div>
+    <ConfigProvider>
+      <div className="flex flex-col px-6 py-6 min-h-screen justify-between">
+        <div className="border-4 border-[var(--card-border)] rounded-lg p-4">
 
-        <div className="flex items-center gap-4">
-          <span className="text-white">
-            Hello, <strong>{user?.username}</strong>
-          </span>
-          <Button
-            icon={<LogoutOutlined />}
-            onClick={handleSignOut}
-            size="small"
-            danger
-          >
-            Sign Out
-          </Button>
-        </div>
-      </Header>
-
-      <Content className="p-6">
-        <div
-          className="max-w-3xl mx-auto rounded-lg p-8 shadow-sm"
-          style={{ background: colorBgContainer }}
-        >
-          <h1 className="text-3xl font-bold mb-2">Welcome to ReadUp 📚</h1>
-          <p className="text-gray-600 mb-2">
-            You are signed in as <strong>{user?.email}</strong>.
-          </p>
-          <p className="text-gray-600 mb-6">
-            Start reading, learning vocabulary, and improving your English
-            comprehension!
-          </p>
-
-          <div className="flex items-center gap-4">
+          {/* Welcome message + Sign Out */}
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="m-0 text-sm">
+                Welcome, {user?.username}
+              </p>
+              <p className="m-0 text-sm text-gray-600">
+                {user?.email}
+              </p>
+            </div>
             <Button
-              onClick={callHealthCheck}
-              loading={checkingHealth}
-              type="primary"
-              size="large"
+              icon={<LogoutOutlined />}
+              onClick={handleSignOut}
+              size="small"
+              danger
             >
-              Call Backend Health Check
+              Sign Out
             </Button>
-            {healthStatus && (
-              <span className="text-sm text-gray-600">
-                Backend status: <strong>{healthStatus}</strong>
-              </span>
-            )}
           </div>
-        </div>
-      </Content>
 
-      <Footer className="text-center text-gray-500">
-        ReadUp &copy; {new Date().getFullYear()}
-      </Footer>
-    </Layout>
-  );
+          {/* Application introduction */}
+          <h1 className="text-4xl font-extrabold text-center m-4">
+            Read Up
+          </h1>
+          <p className="text-center">
+            Turn any text into an interactive learning experience — translate,
+            explore vocabulary, and truly understand what you read.
+          </p>
+
+          <Passage
+            passage={passage}
+            onPassageChange={setPassage}
+            onClear={() => setPassage('')}
+          />
+
+        </div>
+
+        <footer className="px-6 py-4 text-center text-gray-500">
+          CSE499 Team 5 - ReadUp &copy; {new Date().getFullYear()}
+        </footer>
+      </div>
+    </ConfigProvider>
+  )
 }
