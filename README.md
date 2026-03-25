@@ -31,9 +31,12 @@ cd readup
 
 ```bash
 cd backend
+cp .env.example .env
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
+
+After copying `.env.example`, edit `.env` and replace the example values with your real credentials.
 
 The API will be available at `http://127.0.0.1:8000`, with docs at `http://127.0.0.1:8000/docs`.
 
@@ -56,6 +59,11 @@ When both frontend and backend are running, the **â€œCall Backend Health Checkâ€
 
 - Frontend instructions: see `frontend/README.md`
 - Backend instructions: see `backend/README.md`
+
+## Deployment notes
+
+- Frontend: deploy the `frontend/` app to Vercel with `frontend` as the root directory
+- Backend: deploy the `backend/` app to Render as a Web Service
 
 ## Favorite Quotes
 

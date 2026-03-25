@@ -25,8 +25,11 @@ From the project root:
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 ```
+
+Then edit `.env` and replace the example values with your real frontend environment variables.
 
 ---
 
@@ -60,3 +63,11 @@ To preview the production build locally:
 ```bash
 npm run preview
 ```
+
+## Environment variables
+
+- `VITE_API_BASE_URL`: backend API base URL
+- `VITE_SUPABASE_URL`: Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Supabase anon key
+
+For Vercel production, set these in the Vercel dashboard instead of creating a `.env` file on the server.
