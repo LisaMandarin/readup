@@ -3,7 +3,7 @@
 This backend is built with **FastAPI** and served using **Uvicorn**.
 It connects to **Supabase** (PostgreSQL) for data storage.
 
-## Setup
+## Local development setup
 
 From the `backend` directory:
 
@@ -12,6 +12,9 @@ cd backend
 cp .env.example .env        
 pip install -r requirements.txt
 ```
+
+The `cp .env.example .env` step is for local development only.
+After copying, edit `.env` and replace the example values with your real credentials.
 
 Required environment variables:
 
@@ -45,7 +48,7 @@ Create a **Web Service** pointing at the `backend` directory.
 - Build command: `pip install -r requirements.txt`
 - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 
-Set these environment variables in Render:
+Do not create a `.env` file on Render. Set these environment variables in the Render dashboard:
 
 - `DATABASE_URL`
 - `SECRET_KEY`
