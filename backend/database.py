@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 load_dotenv()
@@ -13,11 +13,21 @@ if not DATABASE_URL:
         "Copy .env.example to .env and add your Supabase connection string."
     )
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+normalized_database_url = DATABASE_URL.replace(
+    "postgres://", "postgresql://", 1
+)
+
+engine = create_engine(normalized_database_url, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+def check_database_connection() -> None:
+    """Raise immediately if the configured database is unreachable."""
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
 
 
 def get_db():

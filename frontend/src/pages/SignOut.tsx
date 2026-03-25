@@ -16,6 +16,7 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../context/AuthContext";
+import { signOutRequest } from "../api/auth";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -48,9 +49,13 @@ export default function SignOut() {
 
     // Small delay so the user sees the loading state
     setTimeout(() => {
-      logout();
-      setSigningOut(false);
-      setSignedOut(true);
+      signOutRequest()
+        .catch(() => undefined)
+        .finally(() => {
+          logout();
+          setSigningOut(false);
+          setSignedOut(true);
+        });
     }, 800);
   };
 

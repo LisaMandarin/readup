@@ -32,8 +32,12 @@ cd readup
 ```bash
 cd backend
 pip install -r requirements.txt
+Copy-Item .env.example .env
 uvicorn main:app --reload
 ```
+
+Before starting the backend, update `.env` with your own `SECRET_KEY` and
+`DATABASE_URL` values.
 
 The API will be available at `http://127.0.0.1:8000`, with docs at `http://127.0.0.1:8000/docs`.
 

@@ -28,6 +28,18 @@ cd frontend
 npm install
 ```
 
+Create a local environment file before starting the frontend:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Required frontend environment variables:
+
+- `VITE_API_BASE_URL`: FastAPI backend base URL, for example `http://127.0.0.1:8000`
+- `VITE_SUPABASE_URL`: Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Supabase anon key
+
 ---
 
 ## Run the frontend dev server
@@ -42,7 +54,7 @@ By default Vite runs at:
 - `http://localhost:5173`
 
 You should see the ReadUp landing page with Ant Design components and Tailwind styling.  
-If the backend is also running, the **“Call Backend Health Check”** button on the page will call the FastAPI `/health` endpoint.
+If the backend is also running, the home page will show whether the frontend can reach the backend API and whether the backend can reach the database.
 
 ---
 

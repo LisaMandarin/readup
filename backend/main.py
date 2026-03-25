@@ -1,13 +1,20 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
-from database import Base, engine
+from database import Base, check_database_connection, engine
 from routers.auth_router import router as auth_router
 
-# Create tables in Supabase if they don't exist yet
-Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="ReadUp Backend", version="0.1.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    check_database_connection()
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="ReadUp Backend", version="0.1.0", lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
@@ -27,7 +34,16 @@ app.include_router(auth_router)
 
 @app.get("/health")
 async def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+    return {"status": "ok", "database": "connected"}
+
+
+@app.get("/health/db")
+async def database_health_check() -> dict[str, str]:
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+    return {"status": "ok", "database": "connected"}
 
 
 @app.get("/")

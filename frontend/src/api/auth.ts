@@ -1,7 +1,10 @@
 import axios from "axios";
 
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL?.trim() || "http://127.0.0.1:8000";
+
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: apiBaseUrl.replace(/\/$/, ""),
 });
 
 // Attach JWT to every outgoing request
@@ -27,6 +30,11 @@ export interface UserProfile {
   email: string;
 }
 
+export interface HealthResponse {
+  status: string;
+  database?: string;
+}
+
 // ── API calls ─────────────────────────────────────────────
 
 export const signUpRequest = (
@@ -40,7 +48,11 @@ export const signInRequest = (email: string, password: string) =>
 
 export const getMeRequest = () => API.get<UserProfile>("/auth/me");
 
-export const healthCheckRequest = () =>
-  API.get<{ status: string }>("/health");
+export const signOutRequest = () => API.post<{ message: string }>("/auth/signout");
+
+export const healthCheckRequest = () => API.get<HealthResponse>("/health");
+
+export const databaseHealthCheckRequest = () =>
+  API.get<HealthResponse>("/health/db");
 
 export default API;
