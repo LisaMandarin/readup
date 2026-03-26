@@ -25,20 +25,13 @@ From the project root:
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 ```
 
-Create a local environment file before starting the frontend:
+Then edit `.env` and replace the example values with your real frontend environment variables.
 
-```powershell
-Copy-Item .env.example .env
-```
-
-Required frontend environment variables:
-
-- `VITE_API_BASE_URL`: FastAPI backend base URL, for example `http://127.0.0.1:8000`
-- `VITE_SUPABASE_URL`: Supabase project URL
-- `VITE_SUPABASE_ANON_KEY`: Supabase anon key
+On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
 
 ---
 
@@ -72,3 +65,11 @@ To preview the production build locally:
 ```bash
 npm run preview
 ```
+
+## Environment variables
+
+- `VITE_API_BASE_URL`: backend API base URL
+- `VITE_SUPABASE_URL`: Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Supabase anon key
+
+For Vercel production, set these in the Vercel dashboard instead of creating a `.env` file on the server.

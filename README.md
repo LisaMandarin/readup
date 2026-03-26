@@ -15,6 +15,8 @@ ReadUp aims to support **English language learners** by enhancing their reading 
 - `backend/` – **FastAPI** service (Python)  
   - Provides a basic root endpoint `/` and a health check `/health`  
   - Configured with CORS to allow requests from the Vite dev server
+- `database` – **Supabase PostgreSQL**  
+  - Stores application data for the FastAPI backend
 
 ---
 
@@ -31,13 +33,15 @@ cd readup
 
 ```bash
 cd backend
+cp .env.example .env
 pip install -r requirements.txt
-Copy-Item .env.example .env
 uvicorn main:app --reload
 ```
 
 Before starting the backend, update `.env` with your own `SECRET_KEY` and
 `DATABASE_URL` values.
+
+On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
 
 The API will be available at `http://127.0.0.1:8000`, with docs at `http://127.0.0.1:8000/docs`.
 
@@ -47,9 +51,16 @@ In a separate terminal, from the project root:
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```
+
+After copying `.env.example`, edit `.env` and set:
+
+- `VITE_API_BASE_URL`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
 The frontend will be available at `http://localhost:5173`.  
 When both frontend and backend are running, the **“Call Backend Health Check”** button on the homepage will call the FastAPI `/health` endpoint and display its status.
@@ -60,6 +71,18 @@ When both frontend and backend are running, the **“Call Backend Health Check�
 
 - Frontend instructions: see `frontend/README.md`
 - Backend instructions: see `backend/README.md`
+
+## Deployment notes
+
+- Frontend: deploy the `frontend/` app to Vercel with `frontend` as the root directory
+- Backend: deploy the `backend/` app to Render as a Web Service
+- Database: Supabase PostgreSQL
+
+## Production URLs
+
+- Frontend: `https://readup-topaz.vercel.app`
+- Backend: `https://readup-backend.onrender.com`
+- Backend health check: `https://readup-backend.onrender.com/health`
 
 ## Favorite Quotes
 
