@@ -71,9 +71,9 @@ export default function Sidebar(props: SidebarProps) {
   ]
 
   return (
-    <aside className="w-full lg:w-auto lg:flex-shrink-0">
-      <div className="flex w-full items-stretch gap-4">
-        <div className="flex flex-col items-center gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3">
+    <aside className="w-full self-stretch lg:w-auto lg:flex-shrink-0">
+      <div className="flex h-full w-full items-stretch gap-4">
+        <div className="flex h-full flex-col items-center gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3">
           <nav aria-label="Sidebar menu" className="flex flex-col gap-3">
             {menuItems.map((item) => {
               const isActive = activeMenu === item.key
