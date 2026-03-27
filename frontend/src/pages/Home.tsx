@@ -1,64 +1,78 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ConfigProvider, Button } from 'antd'
-import { LogoutOutlined } from '@ant-design/icons'
+import { Alert, ConfigProvider, Spin } from 'antd'
 import { useAuth } from '../context/AuthContext'
-import Passage from './Passage'
+import MainContent from './MainContent'
+import Sidebar from './Sidebar'
+import type { MenuKey } from './homeTypes'
 
 export default function Home() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [passage, setPassage] = useState('')
+  const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const [signOutError, setSignOutError] = useState<string | null>(null)
 
-  const handleSignOut = () => {
-    navigate('/signout')
+  const handleMenuSelect = (key: MenuKey) => {
+    setActiveMenu((currentKey) => (currentKey === key ? null : key))
   }
 
   return (
     <ConfigProvider>
-      <div className="flex flex-col px-6 py-6 min-h-screen justify-between">
-        <div className="border-4 border-[var(--card-border)] rounded-lg p-4">
-
-          {/* Welcome message + Sign Out */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="m-0 text-sm">
-                Welcome, {user?.username}
-              </p>
-              <p className="m-0 text-sm text-gray-600">
-                {user?.email}
-              </p>
+      <div className="relative min-h-screen">
+        <div
+          className={[
+            'flex min-h-screen flex-col px-6 py-6 transition-opacity duration-200',
+            isSigningOut ? 'opacity-50' : 'opacity-100',
+          ].join(' ')}
+        >
+          {signOutError && (
+            <div className="mb-4">
+              <Alert
+                type="error"
+                showIcon
+                message="Sign out failed"
+                description={signOutError}
+                closable
+                onClose={() => setSignOutError(null)}
+              />
             </div>
-            <Button
-              icon={<LogoutOutlined />}
-              onClick={handleSignOut}
-              size="small"
-              danger
-            >
-              Sign Out
-            </Button>
+          )}
+
+          <div className="flex flex-1 flex-col gap-6 lg:flex-row">
+            <Sidebar
+              activeMenu={activeMenu}
+              onMenuSelect={handleMenuSelect}
+              username={user?.username}
+              email={user?.email}
+              passage={passage}
+              onSignOutStateChange={setIsSigningOut}
+              onSignOutError={setSignOutError}
+            />
+
+            <MainContent
+              username={user?.username}
+              email={user?.email}
+              passage={passage}
+              onPassageChange={setPassage}
+              onClear={() => setPassage('')}
+            />
           </div>
 
-          {/* Application introduction */}
-          <h1 className="text-4xl font-extrabold text-center m-4">
-            Read Up
-          </h1>
-          <p className="text-center">
-            Turn any text into an interactive learning experience — translate,
-            explore vocabulary, and truly understand what you read.
-          </p>
-
-          <Passage
-            passage={passage}
-            onPassageChange={setPassage}
-            onClear={() => setPassage('')}
-          />
-
+          <footer className="px-6 py-4 text-center text-gray-500">
+            CSE499 Team 5 - ReadUp &copy; {new Date().getFullYear()}
+          </footer>
         </div>
 
-        <footer className="px-6 py-4 text-center text-gray-500">
-          CSE499 Team 5 - ReadUp &copy; {new Date().getFullYear()}
-        </footer>
+        {isSigningOut && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-[rgba(243,250,250,0.5)] backdrop-blur-[1px]">
+            <div className="rounded-2xl border border-[rgba(127,29,29,0.18)] bg-white/90 px-8 py-6 text-center shadow-lg">
+              <Spin size="large" />
+              <p className="mt-4 mb-0 text-sm font-medium text-[var(--text-main)]">
+                Signing you out...
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </ConfigProvider>
   )
