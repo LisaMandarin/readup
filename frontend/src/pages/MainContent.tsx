@@ -1,17 +1,20 @@
+import type { TargetLanguage } from '../components/targetLanguages'
 import Passage from './Passage'
 
 type MainContentColumnProps = {
   username?: string
   email?: string
   passage: string
+  targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
+  onTranslate: () => void
   onClear: () => void
 }
 
 type MainContentProps = MainContentColumnProps
 
 export default function MainContent(props: MainContentProps) {
-  const { passage, onPassageChange, onClear } = props
+  const { passage, targetLanguage, onPassageChange, onTranslate, onClear } = props
 
   return (
     <main className="flex-1 rounded-lg border-4 border-[var(--card-border)] p-4">
@@ -26,7 +29,9 @@ export default function MainContent(props: MainContentProps) {
 
       <Passage
         passage={passage}
+        targetLanguage={targetLanguage}
         onPassageChange={onPassageChange}
+        onTranslate={onTranslate}
         onClear={onClear}
       />
     </main>

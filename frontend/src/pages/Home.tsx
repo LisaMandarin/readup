@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, ConfigProvider, Spin } from 'antd'
 import { useAuth } from '../context/AuthContext'
+import type { TargetLanguage } from '../components/targetLanguages'
 import MainContent from './MainContent'
 import Sidebar from './Sidebar'
 import type { MenuKey } from './homeTypes'
@@ -8,12 +9,25 @@ import type { MenuKey } from './homeTypes'
 export default function Home() {
   const { user } = useAuth()
   const [passage, setPassage] = useState('')
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage | ''>('')
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
 
   const handleMenuSelect = (key: MenuKey) => {
     setActiveMenu((currentKey) => (currentKey === key ? null : key))
+  }
+
+  const handleTranslate = () => {
+    if (passage.trim().length === 0 || targetLanguage.length === 0) {
+      return
+    }
+
+    // This is the point where the translation request should be dispatched.
+    console.info('Translate requested', {
+      passage,
+      targetLanguage,
+    })
   }
 
   return (
@@ -45,6 +59,8 @@ export default function Home() {
               username={user?.username}
               email={user?.email}
               passage={passage}
+              targetLanguage={targetLanguage}
+              onTargetLanguageChange={setTargetLanguage}
               onSignOutStateChange={setIsSigningOut}
               onSignOutError={setSignOutError}
             />
@@ -53,7 +69,9 @@ export default function Home() {
               username={user?.username}
               email={user?.email}
               passage={passage}
+              targetLanguage={targetLanguage}
               onPassageChange={setPassage}
+              onTranslate={handleTranslate}
               onClear={() => setPassage('')}
             />
           </div>

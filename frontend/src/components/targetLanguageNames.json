@@ -1,0 +1,18 @@
+{
+  "spanish": {
+    "englishName": "Spanish",
+    "targetLanguageName": "Español"
+  },
+  "french": {
+    "englishName": "French",
+    "targetLanguageName": "Français"
+  },
+  "chinese": {
+    "englishName": "Chinese",
+    "targetLanguageName": "中文"
+  },
+  "german": {
+    "englishName": "German",
+    "targetLanguageName": "Deutsch"
+  }
+}

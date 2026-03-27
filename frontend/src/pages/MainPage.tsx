@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ConfigProvider } from 'antd'
 
+import type { TargetLanguage } from '../components/targetLanguages'
 import Passage from './Passage'
 
 export default function MainPage() {
   const [passage, setPassage] = useState('')
+  const [targetLanguage] = useState<TargetLanguage | ''>('')
 
   return (
     <ConfigProvider>
@@ -22,7 +24,9 @@ export default function MainPage() {
           
           <Passage
             passage={passage}
+            targetLanguage={targetLanguage}
             onPassageChange={setPassage}
+            onTranslate={() => {}}
             onClear={() => setPassage('')}
           />
 

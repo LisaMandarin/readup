@@ -12,6 +12,7 @@ import ProfilePanelItem from '../components/ProfilePanelItem'
 import SettingsPanelItem from '../components/SettingsPanelItem'
 import SessionPanelItem from '../components/SessionPanelItem'
 import SignOutPanelItem from '../components/SignOutPanelItem'
+import type { TargetLanguage } from '../components/targetLanguages'
 import { useAuth } from '../context/AuthContext'
 import type { MenuKey } from './homeTypes'
 
@@ -21,6 +22,8 @@ type SidebarProps = {
   username?: string
   email?: string
   passage: string
+  targetLanguage: TargetLanguage | ''
+  onTargetLanguageChange: (value: TargetLanguage | '') => void
   onSignOutStateChange: (isSigningOut: boolean) => void
   onSignOutError: (message: string | null) => void
 }
@@ -32,6 +35,8 @@ export default function Sidebar(props: SidebarProps) {
     username,
     email,
     passage,
+    targetLanguage,
+    onTargetLanguageChange,
     onSignOutStateChange,
     onSignOutError,
   } = props
@@ -108,13 +113,17 @@ export default function Sidebar(props: SidebarProps) {
             )}
 
             {activeMenu === 'settings' && (
-              <SettingsPanelItem />
+              <SettingsPanelItem
+                targetLanguage={targetLanguage}
+                onTargetLanguageChange={onTargetLanguageChange}
+              />
             )}
 
             {activeMenu === 'session' && (
               <SessionPanelItem
                 hasPassage={hasPassage}
                 passagePreview={passagePreview}
+                targetLanguage={targetLanguage}
                 username={username}
                 email={email}
               />

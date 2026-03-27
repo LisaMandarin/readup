@@ -11,7 +11,7 @@ export default function ProfilePanelItem(props: ProfilePanelItemProps) {
   return (
     <CollapsiblePanelItem
       title="Profile"
-      description="View the current account details for this Read Up session."
+      description="View the current account details."
     >
       <div className="space-y-1 text-sm">
         <p className="m-0">

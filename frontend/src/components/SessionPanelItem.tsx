@@ -2,16 +2,21 @@ import { Divider } from 'antd'
 import { SwapOutlined } from '@ant-design/icons'
 
 import { CollapsiblePanelItem } from './CollapsiblePanel'
+import type { TargetLanguage } from './targetLanguages'
 
 type SessionPanelItemProps = {
   hasPassage: boolean
   passagePreview: string
+  targetLanguage: TargetLanguage | ''
   username?: string
   email?: string
 }
 
 export default function SessionPanelItem(props: SessionPanelItemProps) {
-  const { hasPassage, passagePreview, username, email } = props
+  const { hasPassage, passagePreview, targetLanguage, username, email } = props
+  const targetLanguageLabel = targetLanguage
+    ? targetLanguage.charAt(0).toUpperCase() + targetLanguage.slice(1)
+    : 'Not selected'
 
   return (
     <div className="space-y-4">
@@ -32,7 +37,7 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
               {hasPassage ? 'Passage ready for translation' : 'Waiting for source passage'}
             </p>
             <p className="m-0 text-sm text-slate-600">
-              Target language selection is not configured yet in this view.
+              Target language: {targetLanguageLabel}
             </p>
           </div>
         </div>
