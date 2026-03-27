@@ -66,6 +66,7 @@ export default function Sidebar(props: SidebarProps) {
     { key: 'profile', label: 'Profile', icon: <UserOutlined /> },
     { key: 'settings', label: 'Settings', icon: <SettingOutlined /> },
     { key: 'session', label: 'Session', icon: <FolderOutlined /> },
+    { key: 'signout', label: 'Sign out', icon: <LogoutOutlined /> },
   ]
 
   return (
@@ -84,10 +85,10 @@ export default function Sidebar(props: SidebarProps) {
                     aria-label={item.label}
                     aria-pressed={isActive}
                     className={[
-                      'flex h-12 w-12 items-center justify-center rounded-lg text-xl transition-all',
+                      'flex h-12 w-12 items-center justify-center rounded-xl border text-xl transition-all duration-200',
                       isActive
-                        ? 'border-[var(--accent)] bg-[var(--accent)] text-white shadow-sm'
-                        : 'border-[var(--card-border)] bg-white text-[var(--text-main)] hover:border-[var(--accent)] hover:text-[var(--accent)]',
+                        ? 'border-[var(--accent)] bg-[var(--accent)] text-white shadow-md shadow-[rgba(15,95,92,0.22)]'
+                        : 'border-[rgba(24,57,57,0.18)] bg-white/90 text-[var(--text-main)] hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[rgba(15,95,92,0.08)] hover:text-[var(--accent)] hover:shadow-sm',
                     ].join(' ')}
                   >
                     <span aria-hidden="true">{item.icon}</span>
@@ -96,25 +97,6 @@ export default function Sidebar(props: SidebarProps) {
               )
             })}
           </nav>
-
-          <Tooltip title="Sign out" placement="right">
-            <button
-              type="button"
-              onClick={() => onMenuSelect('signout')}
-              aria-label="Sign out"
-              aria-pressed={activeMenu === 'signout'}
-              className={[
-                'flex h-12 w-12 items-center justify-center rounded-lg text-xl transition-all',
-                activeMenu === 'signout'
-                  ? 'border border-red-600 bg-red-600 text-white shadow-sm'
-                  : 'border border-[var(--card-border)] bg-white text-red-600 hover:border-red-600 hover:bg-red-50',
-              ].join(' ')}
-            >
-              <span aria-hidden="true">
-                <LogoutOutlined />
-              </span>
-            </button>
-          </Tooltip>
         </div>
 
         <CollapsiblePanel isOpen={activeMenu !== null}>
