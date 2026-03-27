@@ -6,6 +6,13 @@ type CollapsiblePanelProps = {
   className?: string
 }
 
+type CollapsiblePanelItemProps = {
+  title: string
+  description: string
+  children?: ReactNode
+  className?: string
+}
+
 export default function CollapsiblePanel(props: CollapsiblePanelProps) {
   const { isOpen, children, className = '' } = props
 
@@ -22,5 +29,24 @@ export default function CollapsiblePanel(props: CollapsiblePanelProps) {
     >
       <div className={isOpen ? 'block' : 'hidden'}>{children}</div>
     </div>
+  )
+}
+
+export function CollapsiblePanelItem(props: CollapsiblePanelItemProps) {
+  const { title, description, children, className = '' } = props
+
+  return (
+    <section
+      className={[
+        'space-y-4 rounded-xl border border-[rgba(24,57,57,0.18)] bg-white/80 p-4 shadow-sm backdrop-blur-sm',
+        className,
+      ].join(' ')}
+    >
+      <div>
+        <h3 className="m-0 text-lg font-semibold text-[var(--text-main)]">{title}</h3>
+        <p className="mt-1 mb-0 text-sm text-slate-600">{description}</p>
+      </div>
+      {children}
+    </section>
   )
 }

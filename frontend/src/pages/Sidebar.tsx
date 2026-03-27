@@ -1,15 +1,17 @@
 import { useState, type ReactNode } from 'react'
-import { Button, Divider, Spin, Tooltip } from 'antd'
+import { Tooltip } from 'antd'
 import {
-  BookOutlined,
   FolderOutlined,
   LogoutOutlined,
-  SwapOutlined,
   SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 
 import CollapsiblePanel from '../components/CollapsiblePanel'
+import ProfilePanelItem from '../components/ProfilePanelItem'
+import SettingsPanelItem from '../components/SettingsPanelItem'
+import SessionPanelItem from '../components/SessionPanelItem'
+import SignOutPanelItem from '../components/SignOutPanelItem'
 import { useAuth } from '../context/AuthContext'
 import type { MenuKey } from './homeTypes'
 
@@ -102,137 +104,30 @@ export default function Sidebar(props: SidebarProps) {
         <CollapsiblePanel isOpen={activeMenu !== null}>
           <div className={activeMenu === null ? 'hidden' : 'block'}>
             {activeMenu === 'profile' && (
-              <>
-                <h3 className="m-0 text-lg font-semibold">Profile</h3>
-                <p className="mt-2 mb-1 text-sm">
-                  <span className="font-medium">Username:</span>{' '}
-                  {username ?? 'Unknown user'}
-                </p>
-                <p className="m-0 text-sm text-gray-600">{email}</p>
-              </>
+              <ProfilePanelItem username={username} email={email} />
             )}
 
             {activeMenu === 'settings' && (
-              <>
-                <h3 className="m-0 text-lg font-semibold">Settings</h3>
-                <p className="mt-2 mb-0 text-sm text-gray-600">
-                  Settings content can be added here when that page is ready.
-                </p>
-              </>
+              <SettingsPanelItem />
             )}
 
             {activeMenu === 'session' && (
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-[rgba(24,57,57,0.18)] bg-[linear-gradient(145deg,rgba(15,95,92,0.14),rgba(255,255,255,0.92))] p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent)] text-lg text-white">
-                      <SwapOutlined />
-                    </div>
-                    <div>
-                      <h3 className="m-0 text-lg font-semibold text-[var(--text-main)]">
-                        Translation Session
-                      </h3>
-                      <p className="mt-1 mb-0 text-sm text-slate-600">
-                        Track the passage currently being prepared for translation.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-[rgba(24,57,57,0.18)] bg-white/80 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="m-0 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Session status
-                  </p>
-                  <p className="mt-3 mb-1 text-base font-semibold text-[var(--text-main)]">
-                    {hasPassage ? 'Passage ready for translation' : 'Waiting for source passage'}
-                  </p>
-                  <p className="m-0 text-sm text-slate-600">
-                    Target language selection is not configured yet in this view.
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-[rgba(24,57,57,0.18)] bg-white/80 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="m-0 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Current passage
-                  </p>
-                  <p className="mt-3 mb-0 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">
-                    {passagePreview}
-                  </p>
-                </div>
-
-                <Divider className="my-0 border-[rgba(24,57,57,0.12)]" />
-
-                <p className="m-0 text-center text-sm italic text-slate-500">
-                  Signed in as {username ?? 'Unknown user'}
-                  {email ? ` • ${email}` : ''}
-                </p>
-              </div>
+              <SessionPanelItem
+                hasPassage={hasPassage}
+                passagePreview={passagePreview}
+                username={username}
+                email={email}
+              />
             )}
 
             {activeMenu === 'signout' && (
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-[rgba(127,29,29,0.18)] bg-[linear-gradient(145deg,rgba(220,38,38,0.10),rgba(255,255,255,0.94))] p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-lg text-white">
-                      <BookOutlined />
-                    </div>
-                    <div>
-                      <h3 className="m-0 text-lg font-semibold text-[var(--text-main)]">
-                        Sign Out
-                      </h3>
-                      <p className="mt-1 mb-0 text-sm text-slate-600">
-                        Confirm this session before leaving Read Up.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-[rgba(127,29,29,0.18)] bg-white/80 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="m-0 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Signed in as
-                  </p>
-                  <p className="mt-3 mb-1 text-base font-semibold text-[var(--text-main)]">
-                    {username ?? 'Unknown user'}
-                  </p>
-                  <p className="m-0 text-sm text-slate-600">{email}</p>
-                </div>
-
-                {isSigningOut ? (
-                  <div className="rounded-xl border border-[rgba(127,29,29,0.18)] bg-white/70 px-4 py-6 text-center shadow-sm">
-                    <Spin size="large" />
-                    <p className="mt-4 mb-0 text-sm text-slate-600">
-                      Signing you out...
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <Button
-                      type="primary"
-                      danger
-                      size="large"
-                      icon={<LogoutOutlined />}
-                      onClick={handleConfirmSignOut}
-                      block
-                    >
-                      Yes, Sign Me Out
-                    </Button>
-                    <Button
-                      size="large"
-                      onClick={() => onMenuSelect('signout')}
-                      block
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-
-                <Divider className="my-0 border-[rgba(127,29,29,0.12)]" />
-
-                <p className="m-0 text-center text-sm italic text-slate-500">
-                  Keep your progress safe by signing out before leaving a shared
-                  device.
-                </p>
-              </div>
+              <SignOutPanelItem
+                username={username}
+                email={email}
+                isSigningOut={isSigningOut}
+                onConfirm={handleConfirmSignOut}
+                onCancel={() => onMenuSelect('signout')}
+              />
             )}
           </div>
         </CollapsiblePanel>
