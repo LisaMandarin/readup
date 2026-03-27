@@ -59,3 +59,39 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TranslateRequest(BaseModel):
+    text: str
+    source_language: str = "auto"
+    target_language: str = "es"
+
+    @field_validator("text")
+    @classmethod
+    def text_not_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Text cannot be empty")
+        if len(v) > 5000:
+            raise ValueError("Text cannot exceed 5000 characters")
+        return v
+
+    @field_validator("target_language")
+    @classmethod
+    def target_not_empty(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not v:
+            raise ValueError("Target language is required")
+        return v
+
+
+class TranslateResponse(BaseModel):
+    original_text: str
+    translated_text: str
+    source_language: str
+    target_language: str
+
+
+class LanguageResponse(BaseModel):
+    code: str
+    name: str        

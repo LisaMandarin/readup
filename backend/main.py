@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from routers.auth_router import router as auth_router
+from routers.translate_router import router as translate_router
 
 # Create tables in Supabase if they don't exist yet
 Base.metadata.create_all(bind=engine)
@@ -23,6 +24,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(translate_router)
 
 
 @app.get("/health")
