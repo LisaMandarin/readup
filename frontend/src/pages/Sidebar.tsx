@@ -34,7 +34,6 @@ export default function Sidebar(props: SidebarProps) {
     onMenuSelect,
     username,
     email,
-    passage,
     targetLanguage,
     onTargetLanguageChange,
     onSignOutStateChange,
@@ -42,11 +41,6 @@ export default function Sidebar(props: SidebarProps) {
   } = props
   const { logout } = useAuth()
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const hasPassage = passage.trim().length > 0
-  const passagePreview = hasPassage
-    ? `${passage.trim().slice(0, 140)}${passage.trim().length > 140 ? '...' : ''}`
-    : 'No passage is queued yet. Add text in the workspace to start a translation session.'
-
   const handleConfirmSignOut = () => {
     setIsSigningOut(true)
     onSignOutError(null)
@@ -120,13 +114,7 @@ export default function Sidebar(props: SidebarProps) {
             )}
 
             {activeMenu === 'session' && (
-              <SessionPanelItem
-                hasPassage={hasPassage}
-                passagePreview={passagePreview}
-                targetLanguage={targetLanguage}
-                username={username}
-                email={email}
-              />
+              <SessionPanelItem />
             )}
 
             {activeMenu === 'signout' && (
