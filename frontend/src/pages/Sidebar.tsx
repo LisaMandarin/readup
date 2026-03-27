@@ -131,8 +131,6 @@ export default function Sidebar(props: SidebarProps) {
 
             {activeMenu === 'signout' && (
               <SignOutPanelItem
-                username={username}
-                email={email}
                 isSigningOut={isSigningOut}
                 onConfirm={handleConfirmSignOut}
                 onCancel={() => onMenuSelect('signout')}
