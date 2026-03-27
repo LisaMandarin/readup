@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { Alert, ConfigProvider, Spin } from 'antd'
+import translationData, {
+  type TranslationRecord,
+} from '../components/translationData'
+import sessionHistoryData from '../components/sessionHistoryData'
 import { useAuth } from '../context/AuthContext'
 import type { TargetLanguage } from '../components/targetLanguages'
 import MainContent from './MainContent'
@@ -13,6 +17,7 @@ export default function Home() {
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
+  const [translations, setTranslations] = useState<TranslationRecord[]>([])
 
   const handleMenuSelect = (key: MenuKey) => {
     setActiveMenu((currentKey) => (currentKey === key ? null : key))
@@ -23,11 +28,54 @@ export default function Home() {
       return
     }
 
-    // This is the point where the translation request should be dispatched.
-    console.info('Translate requested', {
-      passage,
-      targetLanguage,
-    })
+    const selectedSession = translationData.find(
+      (item) => item.targetLanguage === targetLanguage
+    )
+
+    if (!selectedSession) {
+      setTranslations([])
+      return
+    }
+
+    const nextTranslations = translationData.filter(
+      (item) => item.sessionID === selectedSession.sessionID
+    )
+
+    setTranslations(nextTranslations)
+  }
+
+  const handleSessionSelect = (sessionID: string) => {
+    const selectedSession = sessionHistoryData.find(
+      (item) => item.sessionID === sessionID
+    )
+
+    const nextTranslations = translationData.filter(
+      (item) => item.sessionID === sessionID
+    )
+
+    if (!selectedSession || nextTranslations.length === 0) {
+      setTranslations([])
+      return
+    }
+
+    setPassage(selectedSession.passage)
+    setTargetLanguage(selectedSession.targetLanguage)
+    setTranslations(nextTranslations)
+  }
+
+  const handlePassageChange = (value: string) => {
+    setPassage(value)
+    setTranslations([])
+  }
+
+  const handleClear = () => {
+    setPassage('')
+    setTranslations([])
+  }
+
+  const handleTargetLanguageChange = (value: TargetLanguage | '') => {
+    setTargetLanguage(value)
+    setTranslations([])
   }
 
   return (
@@ -60,7 +108,8 @@ export default function Home() {
               email={user?.email}
               passage={passage}
               targetLanguage={targetLanguage}
-              onTargetLanguageChange={setTargetLanguage}
+              onTargetLanguageChange={handleTargetLanguageChange}
+              onSessionSelect={handleSessionSelect}
               onSignOutStateChange={setIsSigningOut}
               onSignOutError={setSignOutError}
             />
@@ -70,9 +119,10 @@ export default function Home() {
               email={user?.email}
               passage={passage}
               targetLanguage={targetLanguage}
-              onPassageChange={setPassage}
+              onPassageChange={handlePassageChange}
               onTranslate={handleTranslate}
-              onClear={() => setPassage('')}
+              onClear={handleClear}
+              translations={translations}
             />
           </div>
 

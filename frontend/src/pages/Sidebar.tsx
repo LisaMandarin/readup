@@ -24,6 +24,7 @@ type SidebarProps = {
   passage: string
   targetLanguage: TargetLanguage | ''
   onTargetLanguageChange: (value: TargetLanguage | '') => void
+  onSessionSelect: (sessionID: string) => void
   onSignOutStateChange: (isSigningOut: boolean) => void
   onSignOutError: (message: string | null) => void
 }
@@ -36,6 +37,7 @@ export default function Sidebar(props: SidebarProps) {
     email,
     targetLanguage,
     onTargetLanguageChange,
+    onSessionSelect,
     onSignOutStateChange,
     onSignOutError,
   } = props
@@ -114,7 +116,7 @@ export default function Sidebar(props: SidebarProps) {
             )}
 
             {activeMenu === 'session' && (
-              <SessionPanelItem />
+              <SessionPanelItem onSessionSelect={onSessionSelect} />
             )}
 
             {activeMenu === 'signout' && (

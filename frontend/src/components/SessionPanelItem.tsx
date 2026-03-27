@@ -1,31 +1,49 @@
-import { format, formatDistanceToNowStrict, isToday } from 'date-fns'
+import { format, formatDistanceToNowStrict, isToday, isValid } from 'date-fns'
 import targetLanguageNames from './targetLanguageNames.json'
 
 import { CollapsiblePanelItem } from './CollapsiblePanel'
 import sessionHistoryData from './sessionHistoryData'
 
+type SessionPanelItemProps = {
+  onSessionSelect: (sessionID: string) => void
+}
+
 function truncateText(value: string, maxLength: number) {
   return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value
 }
 
-function formatSessionUpdatedAt(updatedAt: Date) {
-  const minutesSinceUpdate = Math.floor((Date.now() - updatedAt.getTime()) / 60000)
+function toValidDate(value: Date | string) {
+  const normalizedDate = value instanceof Date ? value : new Date(value)
 
-  if (isToday(updatedAt) && minutesSinceUpdate >= 0 && minutesSinceUpdate < 60) {
-    return formatDistanceToNowStrict(updatedAt, { addSuffix: true })
-  }
-
-  if (isToday(updatedAt)) {
-    return format(updatedAt, 'p')
-  }
-
-  return format(updatedAt, 'MMM d, yyyy p')
+  return isValid(normalizedDate) ? normalizedDate : null
 }
 
-export default function SessionPanelItem() {
+function formatSessionUpdatedAt(updatedAt: Date | string) {
+  const normalizedDate = toValidDate(updatedAt)
+
+  if (!normalizedDate) {
+    return 'Unknown update time'
+  }
+
+  const minutesSinceUpdate = Math.floor((Date.now() - normalizedDate.getTime()) / 60000)
+
+  if (isToday(normalizedDate) && minutesSinceUpdate >= 0 && minutesSinceUpdate < 60) {
+    return formatDistanceToNowStrict(normalizedDate, { addSuffix: true })
+  }
+
+  if (isToday(normalizedDate)) {
+    return format(normalizedDate, 'p')
+  }
+
+  return format(normalizedDate, 'MMM d, yyyy p')
+}
+
+export default function SessionPanelItem(props: SessionPanelItemProps) {
+  const { onSessionSelect } = props
   const sessions = [...sessionHistoryData].sort(
     (left, right) =>
-      new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
+      (toValidDate(right.updatedAt)?.getTime() ?? 0) -
+      (toValidDate(left.updatedAt)?.getTime() ?? 0)
   )
 
   return (
@@ -49,6 +67,7 @@ export default function SessionPanelItem() {
             <button
               key={session.sessionID}
               type="button"
+              onClick={() => onSessionSelect(session.sessionID)}
               className="block w-full rounded-xl border border-[rgba(24,57,57,0.16)] bg-[rgba(24,57,57,0.04)] px-4 py-4 text-left transition-colors duration-200 hover:border-[var(--accent)] hover:bg-[rgba(15,95,92,0.08)]"
             >
               <div className="space-y-3">

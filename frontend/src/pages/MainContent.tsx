@@ -1,4 +1,6 @@
 import type { TargetLanguage } from '../components/targetLanguages'
+import type { TranslationRecord } from '../components/translationData'
+import Translation from '../components/Translation'
 import Passage from './Passage'
 
 type MainContentColumnProps = {
@@ -9,6 +11,7 @@ type MainContentColumnProps = {
   onPassageChange: (value: string) => void
   onTranslate: () => void
   onClear: () => void
+  translations: TranslationRecord[]
 }
 
 type MainContentProps = MainContentColumnProps
@@ -34,6 +37,8 @@ export default function MainContent(props: MainContentProps) {
         onTranslate={onTranslate}
         onClear={onClear}
       />
+
+      <Translation translations={props.translations} />
     </main>
   )
 }
