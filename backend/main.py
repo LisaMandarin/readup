@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,10 +12,24 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ReadUp Backend", version="0.1.0")
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+
+def get_allowed_origins() -> list[str]:
+    """Read comma-separated CORS origins from the environment."""
+    cors_origins = os.getenv("CORS_ORIGINS")
+    if cors_origins:
+        return [
+            origin.strip()
+            for origin in cors_origins.split(",")
+            if origin.strip()
+        ]
+
+    return [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
+
+origins = get_allowed_origins()
 
 app.add_middleware(
     CORSMiddleware,
