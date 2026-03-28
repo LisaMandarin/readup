@@ -115,8 +115,6 @@ export default function Home() {
             />
 
             <MainContent
-              username={user?.username}
-              email={user?.email}
               passage={passage}
               targetLanguage={targetLanguage}
               onPassageChange={handlePassageChange}

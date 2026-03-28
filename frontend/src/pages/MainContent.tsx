@@ -4,8 +4,6 @@ import Translation from '../components/Translation'
 import Passage from './Passage'
 
 type MainContentColumnProps = {
-  username?: string
-  email?: string
   passage: string
   targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
