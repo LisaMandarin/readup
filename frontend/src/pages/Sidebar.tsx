@@ -74,8 +74,8 @@ export default function Sidebar(props: SidebarProps) {
 
   return (
     <aside className="w-full self-stretch lg:w-auto lg:flex-shrink-0">
-      <div className="flex h-full w-full items-stretch gap-4">
-        <div className="flex h-full flex-col items-center gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3">
+      <div className="flex h-full w-full items-stretch">
+        <div className="flex h-full w-full items-stretch gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3">
           <nav aria-label="Sidebar menu" className="flex flex-col gap-3">
             {menuItems.map((item) => {
               const isActive = activeMenu === item.key
@@ -100,34 +100,37 @@ export default function Sidebar(props: SidebarProps) {
               )
             })}
           </nav>
+
+          <CollapsiblePanel
+            isOpen={activeMenu !== null}
+            className="border-0 bg-transparent p-0 shadow-none"
+          >
+            <div className={activeMenu === null ? 'hidden h-full' : 'block h-full'}>
+              {activeMenu === 'profile' && (
+                <ProfilePanelItem username={username} email={email} />
+              )}
+
+              {activeMenu === 'settings' && (
+                <SettingsPanelItem
+                  targetLanguage={targetLanguage}
+                  onTargetLanguageChange={onTargetLanguageChange}
+                />
+              )}
+
+              {activeMenu === 'session' && (
+                <SessionPanelItem onSessionSelect={onSessionSelect} />
+              )}
+
+              {activeMenu === 'signout' && (
+                <SignOutPanelItem
+                  isSigningOut={isSigningOut}
+                  onConfirm={handleConfirmSignOut}
+                  onCancel={() => onMenuSelect('signout')}
+                />
+              )}
+            </div>
+          </CollapsiblePanel>
         </div>
-
-        <CollapsiblePanel isOpen={activeMenu !== null}>
-          <div className={activeMenu === null ? 'hidden' : 'block'}>
-            {activeMenu === 'profile' && (
-              <ProfilePanelItem username={username} email={email} />
-            )}
-
-            {activeMenu === 'settings' && (
-              <SettingsPanelItem
-                targetLanguage={targetLanguage}
-                onTargetLanguageChange={onTargetLanguageChange}
-              />
-            )}
-
-            {activeMenu === 'session' && (
-              <SessionPanelItem onSessionSelect={onSessionSelect} />
-            )}
-
-            {activeMenu === 'signout' && (
-              <SignOutPanelItem
-                isSigningOut={isSigningOut}
-                onConfirm={handleConfirmSignOut}
-                onCancel={() => onMenuSelect('signout')}
-              />
-            )}
-          </div>
-        </CollapsiblePanel>
       </div>
     </aside>
   )
