@@ -1,6 +1,9 @@
+from pydantic import BaseModel, field_validator, model_validator
+from typing import Optional
+from datetime import datetime
 import re
-from pydantic import BaseModel, field_validator
 
+# ── Auth Schemas ──────────────────────────────
 
 class SignUpRequest(BaseModel):
     username: str
@@ -61,37 +64,87 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
-class TranslateRequest(BaseModel):
-    text: str
-    source_language: str = "auto"
-    target_language: str = "es"
+# ── Translation Schemas ────────────────────────────────────
 
-    @field_validator("text")
+SUPPORTED_LANGUAGES = ["spanish", "french", "chinese", "japanese"]
+
+
+class TranslateRequest(BaseModel):
+    passage: str
+
+    # Accept EITHER field name from the frontend
+    targetLanguage: Optional[str] = None
+    target_language: Optional[str] = None
+
+    @model_validator(mode="after")
+    def normalize_target_language(self):
+        """Accept targetLanguage OR target_language, store in targetLanguage."""
+        # Grab whichever one was sent
+        value = self.targetLanguage or self.target_language
+
+        if not value:
+            raise ValueError(
+                "Target language is required. "
+                "Send 'targetLanguage' or 'target_language'."
+            )
+
+        value = value.strip().lower()
+
+        if value not in SUPPORTED_LANGUAGES:
+            raise ValueError(
+                f"Unsupported language: '{value}'. "
+                f"Choose from: {', '.join(SUPPORTED_LANGUAGES)}"
+            )
+
+        self.targetLanguage = value
+        self.target_language = value
+        return self
+
+    @field_validator("passage")
     @classmethod
-    def text_not_empty(cls, v: str) -> str:
+    def passage_not_empty(cls, v: str) -> str:
         v = v.strip()
         if not v:
-            raise ValueError("Text cannot be empty")
+            raise ValueError("Passage cannot be empty")
         if len(v) > 5000:
-            raise ValueError("Text cannot exceed 5000 characters")
-        return v
-
-    @field_validator("target_language")
-    @classmethod
-    def target_not_empty(cls, v: str) -> str:
-        v = v.strip().lower()
-        if not v:
-            raise ValueError("Target language is required")
+            raise ValueError("Passage cannot exceed 5000 characters")
         return v
 
 
-class TranslateResponse(BaseModel):
-    original_text: str
-    translated_text: str
-    source_language: str
-    target_language: str
+class SentenceTranslationResponse(BaseModel):
+    uid: int
+    sentence: str
+    translation: str
+    targetLanguage: str
+    sessionID: str
+
+    class Config:
+        from_attributes = True
 
 
-class LanguageResponse(BaseModel):
-    code: str
-    name: str        
+class SessionResponse(BaseModel):
+    sessionID: str
+    userID: str
+    title: str
+    passage: str
+    targetLanguage: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TranslateFullResponse(BaseModel):
+    session: SessionResponse
+    translations: list[SentenceTranslationResponse]
+
+
+class SessionListItem(BaseModel):
+    sessionID: str
+    title: str
+    targetLanguage: str
+    createdAt: datetime
+
+    class Config:
+        from_attributes = True

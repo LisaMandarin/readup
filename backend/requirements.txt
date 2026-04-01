@@ -6,4 +6,5 @@ python-jose[cryptography]
 bcrypt
 python-multipart
 python-dotenv
+spacy
 deep-translator
