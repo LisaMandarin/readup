@@ -8,7 +8,9 @@ const { TextArea } = Input
 
 interface PassageProps {
   passage: string
+  targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
+  onTranslate: () => void
   onClear: () => void
 }
 
