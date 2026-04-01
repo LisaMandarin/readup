@@ -1,5 +1,7 @@
 import re
+from datetime import datetime
 from pydantic import BaseModel, field_validator
+from typing import List, Optional
 
 
 class SignUpRequest(BaseModel):
@@ -48,6 +50,68 @@ class SignInRequest(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
+
+
+# Session Schemas
+class SessionCreateRequest(BaseModel):
+    sentence: str
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_valid(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 1:
+            raise ValueError("Sentence cannot be empty")
+        if len(v) > 50000:
+            raise ValueError("Sentence too long")
+        return v
+
+
+class SessionResponse(BaseModel):
+    id: int
+    title: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Passage Schemas
+class PassageCreateRequest(BaseModel):
+    sentence: str
+    translation: Optional[str] = None
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_valid(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 1:
+            raise ValueError("Sentence cannot be empty")
+        if len(v) > 50000:
+            raise ValueError("Sentence too long")
+        return v
+
+
+class PassageResponse(BaseModel):
+    id: int
+    sentence: str
+    translation: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class SessionWithPassagesResponse(BaseModel):
+    id: int
+    title: str
+    created_at: datetime
+    updated_at: datetime
+    passages: List[PassageResponse]
+
+    class Config:
+        from_attributes = True
     token_type: str = "bearer"
     username: str
 

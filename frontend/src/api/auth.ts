@@ -40,7 +40,7 @@ export interface HealthResponse {
 export const signUpRequest = (
   username: string,
   email: string,
-  password: string
+  password: string,
 ) => API.post<AuthResponse>("/auth/signup", { username, email, password });
 
 export const signInRequest = (email: string, password: string) =>
@@ -48,7 +48,8 @@ export const signInRequest = (email: string, password: string) =>
 
 export const getMeRequest = () => API.get<UserProfile>("/auth/me");
 
-export const signOutRequest = () => API.post<{ message: string }>("/auth/signout");
+export const signOutRequest = () =>
+  API.post<{ message: string }>("/auth/signout");
 
 export const healthCheckRequest = () => API.get<HealthResponse>("/health");
 

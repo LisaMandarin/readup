@@ -34,7 +34,7 @@ export default function SignIn() {
       message.error(
         typeof detail === "string"
           ? detail
-          : "Sign-in failed. Please try again."
+          : "Sign-in failed. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -95,9 +95,7 @@ export default function SignIn() {
           <Form.Item
             name="password"
             label="Password"
-            rules={[
-              { required: true, message: "Please enter your password" },
-            ]}
+            rules={[{ required: true, message: "Please enter your password" }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
@@ -126,6 +124,16 @@ export default function SignIn() {
               <strong>Sign Up</strong>
             </Link>
           </Text>
+          
+          {/* DEMO LINK - REMOVE AFTER MEETING */}
+          <br />
+          <Text type="secondary" style={{ marginTop: 8, display: "block" }}>
+            Or view the{" "}
+            <Link to="/demo">
+              <strong>Session History Demo</strong>
+            </Link>
+          </Text>
+          {/* END DEMO LINK */}
         </div>
       </Card>
     </div>

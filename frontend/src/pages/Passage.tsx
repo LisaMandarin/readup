@@ -1,20 +1,41 @@
-import { Button, Card, Input, Space } from 'antd'
-import type { TargetLanguage } from '../components/targetLanguages'
+import { useState } from 'react'
+import { Button, Card, Input, Space, message, Spin } from 'antd'
+import { createSession, type SessionResponse } from '../api/sessions'
 
 type Props = {
   passage: string
-  targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
-  onTranslate: () => void
   onClear: () => void
+  onSessionCreated?: (session: SessionResponse) => void
 }
 
 export default function Passage(props: Props) {
-  const { passage, targetLanguage, onPassageChange, onTranslate, onClear } = props
-  const hasPassage = passage.trim().length > 0
-  const isTranslateDisabled =
-    !hasPassage || targetLanguage.length === 0
-  const needsTargetLanguage = hasPassage && targetLanguage.length === 0
+  const { passage, onPassageChange, onClear, onSessionCreated } = props
+  const [loading, setLoading] = useState(false)
+
+  const handleTranslation = async () => {
+    if (!passage.trim()) {
+      message.warning('Please enter a passage to translate')
+      return
+    }
+
+    try {
+      setLoading(true)
+      const { data: session } = await createSession({ sentence: passage })
+      
+      message.success('Session created! Translation feature coming soon...')
+      onSessionCreated?.(session)
+      
+      // For now, we just create the session. Translation functionality
+      // can be added later when translation API is ready
+      
+    } catch (error) {
+      console.error('Error creating session:', error)
+      message.error('Failed to create session. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Card
@@ -28,20 +49,20 @@ export default function Passage(props: Props) {
         value={passage}
         onChange={(event) => onPassageChange(event.target.value)}
         placeholder='Enter the passage you want to translate'
+        disabled={loading}
       />
 
       <Space className='mt-4'>
-        <Button type='primary' onClick={onTranslate} disabled={isTranslateDisabled}>
-          Translation
+        <Button 
+          type='primary' 
+          onClick={() => void handleTranslation()}
+          loading={loading}
+          disabled={!passage.trim()}
+        >
+          {loading ? 'Creating Session...' : 'Start Translation Session'}
         </Button>
-        <Button onClick={onClear}>Clear</Button>
+        <Button onClick={onClear} disabled={loading}>Clear</Button>
       </Space>
-
-      {needsTargetLanguage && (
-        <p className="mt-3 mb-0 text-sm text-amber-700">
-          Select a target language in Settings to enable translation.
-        </p>
-      )}
     </Card>
   )
 }

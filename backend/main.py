@@ -7,12 +7,15 @@ from sqlalchemy import text
 
 from database import Base, check_database_connection, engine
 from routers.auth_router import router as auth_router
+from routers.sessions_router import router as sessions_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    check_database_connection()
-    Base.metadata.create_all(bind=engine)
+    # TODO: Configure proper database credentials in .env file
+    # Temporarily disabled for development
+    # check_database_connection()
+    # Base.metadata.create_all(bind=engine)
     yield
 
 app = FastAPI(title="ReadUp Backend", version="0.1.0", lifespan=lifespan)
@@ -45,20 +48,23 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(sessions_router)
 
 
 @app.get("/health")
 async def health_check() -> dict[str, str]:
-    with engine.connect() as connection:
-        connection.execute(text("SELECT 1"))
-    return {"status": "ok", "database": "connected"}
+    # TODO: Enable database check once DB is configured
+    # with engine.connect() as connection:
+    #     connection.execute(text("SELECT 1"))
+    return {"status": "ok", "database": "temporarily_disabled"}
 
 
 @app.get("/health/db")
 async def database_health_check() -> dict[str, str]:
-    with engine.connect() as connection:
-        connection.execute(text("SELECT 1"))
-    return {"status": "ok", "database": "connected"}
+    # TODO: Enable database check once DB is configured 
+    # with engine.connect() as connection:
+    #     connection.execute(text("SELECT 1"))
+    return {"status": "ok", "database": "temporarily_disabled"}
 
 
 @app.get("/")
