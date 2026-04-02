@@ -20,7 +20,7 @@ export default function CollapsiblePanel(props: CollapsiblePanelProps) {
     <div
       aria-hidden={!isOpen}
       className={[
-        'overflow-hidden rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] transition-all duration-300 ease-out',
+        'overflow-hidden rounded-lg bg-[var(--card-bg)] transition-all duration-300 ease-out',
         isOpen
           ? 'w-72 translate-x-0 p-4 opacity-100'
           : 'w-0 min-w-0 -translate-x-3 border-transparent p-0 opacity-0',
