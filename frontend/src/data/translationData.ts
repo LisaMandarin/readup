@@ -1,4 +1,4 @@
-import type { TargetLanguage } from './targetLanguages'
+import type { TargetLanguage } from '../components/targetLanguages'
 
 export type TranslationRecord = {
   uid: number

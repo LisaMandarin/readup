@@ -1,5 +1,5 @@
 import type { TargetLanguage } from '../components/targetLanguages'
-import type { TranslationRecord } from '../components/translationData'
+import type { TranslationRecord } from '../data/translationData'
 import Translation from '../components/Translation'
 import Passage from './Passage'
 

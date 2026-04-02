@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Alert, ConfigProvider, Spin } from 'antd'
 import translationData, {
   type TranslationRecord,
-} from '../components/translationData'
-import sessionHistoryData from '../components/sessionHistoryData'
+} from '../data/translationData'
+import sessionHistoryData from '../data/sessionHistoryData'
 import { useAuth } from '../context/AuthContext'
 import type { TargetLanguage } from '../components/targetLanguages'
 import MainContent from './MainContent'

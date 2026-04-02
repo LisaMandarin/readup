@@ -1,8 +1,8 @@
 import { format, formatDistanceToNowStrict, isToday, isValid } from 'date-fns'
-import targetLanguageNames from './targetLanguageNames.json'
+import targetLanguageNames from '../data/targetLanguageNames.json'
 
 import { CollapsiblePanelItem } from './CollapsiblePanel'
-import sessionHistoryData from './sessionHistoryData'
+import sessionHistoryData from '../data/sessionHistoryData'
 
 type SessionPanelItemProps = {
   onSessionSelect: (sessionID: string) => void

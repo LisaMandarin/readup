@@ -1,4 +1,4 @@
-import targetLanguageNames from './targetLanguageNames.json'
+import targetLanguageNames from '../data/targetLanguageNames.json'
 
 export type TargetLanguage = keyof typeof targetLanguageNames
 

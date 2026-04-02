@@ -1,8 +1,8 @@
 import { TranslationOutlined } from '@ant-design/icons'
 import { Card } from 'antd'
 
-import targetLanguageNames from './targetLanguageNames.json'
-import type { TranslationRecord } from './translationData'
+import targetLanguageNames from '../data/targetLanguageNames.json'
+import type { TranslationRecord } from '../data/translationData'
 
 type Props = {
   translations: TranslationRecord[]
