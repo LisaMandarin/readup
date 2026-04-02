@@ -9,20 +9,26 @@ import {
   message,
   Space,
   Divider,
+  Alert,
 } from "antd";
 import { MailOutlined, LockOutlined, BookOutlined } from "@ant-design/icons";
-import { signInRequest } from "../api/auth";
+import { signInRequest, resendCodeRequest } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 
 const { Title, Text } = Typography;
 
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
+    setUnverifiedEmail(null);
+
     try {
       const { data } = await signInRequest(values.email, values.password);
       login(data.access_token, data.username);
@@ -30,14 +36,39 @@ export default function SignIn() {
       navigate("/");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { detail?: string } } };
-      const detail = error.response?.data?.detail;
-      message.error(
-        typeof detail === "string"
-          ? detail
-          : "Sign-in failed. Please try again."
-      );
+      const detail = error.response?.data?.detail || "";
+
+      // Detect unverified email error
+      if (
+        detail.toLowerCase().includes("email not confirmed") ||
+        detail.toLowerCase().includes("not confirmed") ||
+        detail.toLowerCase().includes("not verified")
+      ) {
+        setUnverifiedEmail(values.email);
+        message.warning("Please verify your email before signing in.");
+      } else {
+        message.error(
+          typeof detail === "string" && detail
+            ? detail
+            : "Sign-in failed. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail) return;
+    setResending(true);
+    try {
+      await resendCodeRequest(unverifiedEmail);
+      message.success("Verification code sent! Check your email.");
+      navigate("/signup");
+    } catch {
+      message.error("Failed to resend verification code.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -70,6 +101,31 @@ export default function SignIn() {
         </Space>
 
         <Divider />
+
+        {/* Unverified email alert */}
+        {unverifiedEmail && (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+            message="Email not verified"
+            description={
+              <Space direction="vertical" size="small">
+                <Text>
+                  Please verify <strong>{unverifiedEmail}</strong> before signing in.
+                </Text>
+                <Button
+                  type="link"
+                  onClick={handleResendVerification}
+                  loading={resending}
+                  style={{ padding: 0 }}
+                >
+                  Resend verification code →
+                </Button>
+              </Space>
+            }
+          />
+        )}
 
         <Form
           layout="vertical"

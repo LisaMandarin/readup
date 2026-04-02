@@ -1,9 +1,10 @@
-from pydantic import BaseModel, field_validator, model_validator
-from typing import Optional
-from datetime import datetime
 import re
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, field_validator, model_validator
 
-# ── Auth Schemas ──────────────────────────────
+
+# ── Auth Schemas ───────────────────────────────────────────
 
 class SignUpRequest(BaseModel):
     username: str
@@ -39,6 +40,35 @@ class SignUpRequest(BaseModel):
         return v
 
 
+class VerifyRequest(BaseModel):
+    email: str
+    code: str
+
+    @field_validator("email")
+    @classmethod
+    def email_lower(cls, v: str) -> str:
+        return v.strip().lower()
+
+    @field_validator("code")
+    @classmethod
+    def code_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Verification code is required")
+        if len(v) != 6 or not v.isdigit():
+            raise ValueError("Verification code must be 6 digits")
+        return v
+
+
+class ResendRequest(BaseModel):
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def email_lower(cls, v: str) -> str:
+        return v.strip().lower()
+
+
 class SignInRequest(BaseModel):
     email: str
     password: str
@@ -64,6 +94,10 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+class MessageResponse(BaseModel):
+    message: str
+
+
 # ── Translation Schemas ────────────────────────────────────
 
 SUPPORTED_LANGUAGES = ["spanish", "french", "chinese", "japanese"]
@@ -71,31 +105,23 @@ SUPPORTED_LANGUAGES = ["spanish", "french", "chinese", "japanese"]
 
 class TranslateRequest(BaseModel):
     passage: str
-
-    # Accept EITHER field name from the frontend
     targetLanguage: Optional[str] = None
     target_language: Optional[str] = None
 
     @model_validator(mode="after")
     def normalize_target_language(self):
-        """Accept targetLanguage OR target_language, store in targetLanguage."""
-        # Grab whichever one was sent
         value = self.targetLanguage or self.target_language
-
         if not value:
             raise ValueError(
                 "Target language is required. "
                 "Send 'targetLanguage' or 'target_language'."
             )
-
         value = value.strip().lower()
-
         if value not in SUPPORTED_LANGUAGES:
             raise ValueError(
                 f"Unsupported language: '{value}'. "
                 f"Choose from: {', '.join(SUPPORTED_LANGUAGES)}"
             )
-
         self.targetLanguage = value
         self.target_language = value
         return self

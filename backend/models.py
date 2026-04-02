@@ -6,7 +6,6 @@ from database import Base
 
 
 def generate_session_id():
-    """Generate a short session ID like 'session-8f3a'."""
     return f"session-{uuid.uuid4().hex[:4]}"
 
 
@@ -16,7 +15,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    hashed_password = Column(String, nullable=True)  # Not used — Supabase handles passwords
     created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -57,9 +56,6 @@ class TranslationSession(Base):
         order_by="SentenceTranslation.uid",
     )
 
-    def __repr__(self):
-        return f"<TranslationSession(session_id='{self.session_id}')>"
-
 
 class SentenceTranslation(Base):
     __tablename__ = "sentence_translations"
@@ -76,6 +72,3 @@ class SentenceTranslation(Base):
     )
 
     session = relationship("TranslationSession", back_populates="translations")
-
-    def __repr__(self):
-        return f"<SentenceTranslation(uid={self.uid}, session_id='{self.session_id}')>"

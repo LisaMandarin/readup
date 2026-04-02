@@ -3,8 +3,8 @@ uvicorn[standard]==0.34.0
 sqlalchemy
 psycopg2-binary
 python-jose[cryptography]
-bcrypt
 python-multipart
 python-dotenv
 spacy
 deep-translator
+requests
