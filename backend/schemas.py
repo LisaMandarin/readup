@@ -67,6 +67,21 @@ class SessionCreateRequest(BaseModel):
         return v
 
 
+class SessionUpdateRequest(BaseModel):
+    title: Optional[str] = None
+
+    @field_validator("title")
+    @classmethod
+    def title_valid(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) < 1:
+                raise ValueError("Title cannot be empty")
+            if len(v) > 200:
+                raise ValueError("Title too long")
+        return v
+
+
 class SessionResponse(BaseModel):
     id: int
     title: str
@@ -90,6 +105,22 @@ class PassageCreateRequest(BaseModel):
             raise ValueError("Sentence cannot be empty")
         if len(v) > 50000:
             raise ValueError("Sentence too long")
+        return v
+
+
+class PassageUpdateRequest(BaseModel):
+    sentence: Optional[str] = None
+    translation: Optional[str] = None
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_valid(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) < 1:
+                raise ValueError("Sentence cannot be empty")
+            if len(v) > 50000:
+                raise ValueError("Sentence too long")
         return v
 
 

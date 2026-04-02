@@ -12,10 +12,9 @@ from routers.sessions_router import router as sessions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # TODO: Configure proper database credentials in .env file
-    # Temporarily disabled for development
-    # check_database_connection()
-    # Base.metadata.create_all(bind=engine)
+    # Database connection and table creation
+    check_database_connection()
+    Base.metadata.create_all(bind=engine)
     yield
 
 app = FastAPI(title="ReadUp Backend", version="0.1.0", lifespan=lifespan)
@@ -53,18 +52,22 @@ app.include_router(sessions_router)
 
 @app.get("/health")
 async def health_check() -> dict[str, str]:
-    # TODO: Enable database check once DB is configured
-    # with engine.connect() as connection:
-    #     connection.execute(text("SELECT 1"))
-    return {"status": "ok", "database": "temporarily_disabled"}
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "ok", "database": f"error: {str(e)}"}
 
 
 @app.get("/health/db")
 async def database_health_check() -> dict[str, str]:
-    # TODO: Enable database check once DB is configured 
-    # with engine.connect() as connection:
-    #     connection.execute(text("SELECT 1"))
-    return {"status": "ok", "database": "temporarily_disabled"}
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": f"error: {str(e)}"}
 
 
 @app.get("/")

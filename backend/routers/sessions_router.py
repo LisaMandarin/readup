@@ -6,8 +6,10 @@ from database import get_db
 from models import User, Session as SessionModel, Passage
 from schemas import (
     SessionCreateRequest,
+    SessionUpdateRequest,
     SessionResponse,
     PassageCreateRequest,
+    PassageUpdateRequest,
     PassageResponse,
     SessionWithPassagesResponse
 )
@@ -176,3 +178,183 @@ async def get_session_passages(
     )
     
     return passages
+
+
+@router.put("/{session_id}", response_model=SessionResponse)
+async def update_session(
+    session_id: int,
+    request: SessionUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update a session's title or other metadata"""
+    # Get session and verify ownership
+    session = (
+        db.query(SessionModel)
+        .filter(
+            SessionModel.id == session_id,
+            SessionModel.user_id == current_user.id
+        )
+        .first()
+    )
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found"
+        )
+    
+    # Update fields if provided
+    if request.title is not None:
+        session.title = request.title
+    
+    # Update timestamp
+    from datetime import datetime, timezone
+    session.updated_at = datetime.now(timezone.utc)
+    
+    db.commit()
+    db.refresh(session)
+    
+    return session
+
+
+@router.delete("/{session_id}")
+async def delete_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete a session and all its passages"""
+    # Get session and verify ownership
+    session = (
+        db.query(SessionModel)
+        .filter(
+            SessionModel.id == session_id,
+            SessionModel.user_id == current_user.id
+        )
+        .first()
+    )
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found"
+        )
+    
+    # Delete all passages first (due to foreign key constraints)
+    db.query(Passage).filter(Passage.session_id == session_id).delete()
+    
+    # Delete the session
+    db.delete(session)
+    db.commit()
+    
+    return {"message": "Session deleted successfully"}
+
+
+@router.put("/{session_id}/passages/{passage_id}", response_model=PassageResponse)
+async def update_passage(
+    session_id: int,
+    passage_id: int,
+    request: PassageUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update a passage's content or translation"""
+    # Verify session belongs to current user
+    session = (
+        db.query(SessionModel)
+        .filter(
+            SessionModel.id == session_id,
+            SessionModel.user_id == current_user.id
+        )
+        .first()
+    )
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found"
+        )
+    
+    # Get the passage
+    passage = (
+        db.query(Passage)
+        .filter(
+            Passage.id == passage_id,
+            Passage.session_id == session_id
+        )
+        .first()
+    )
+    
+    if not passage:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Passage not found"
+        )
+    
+    # Update fields if provided
+    if request.sentence is not None:
+        passage.sentence = request.sentence
+    if request.translation is not None:
+        passage.translation = request.translation
+    
+    # Update session's updated_at timestamp
+    from datetime import datetime, timezone
+    session.updated_at = datetime.now(timezone.utc)
+    
+    db.commit()
+    db.refresh(passage)
+    
+    return passage
+
+
+@router.delete("/{session_id}/passages/{passage_id}")
+async def delete_passage(
+    session_id: int,
+    passage_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete a specific passage from a session"""
+    # Verify session belongs to current user
+    session = (
+        db.query(SessionModel)
+        .filter(
+            SessionModel.id == session_id,
+            SessionModel.user_id == current_user.id
+        )
+        .first()
+    )
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found"
+        )
+    
+    # Get the passage
+    passage = (
+        db.query(Passage)
+        .filter(
+            Passage.id == passage_id,
+            Passage.session_id == session_id
+        )
+        .first()
+    )
+    
+    if not passage:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Passage not found"
+        )
+    
+    # Delete the passage
+    db.delete(passage)
+    
+    # Update session's updated_at timestamp
+    from datetime import datetime, timezone
+    session.updated_at = datetime.now(timezone.utc)
+    
+    db.commit()
+    
+    return {"message": "Passage deleted successfully"}
