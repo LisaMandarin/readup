@@ -1,4 +1,5 @@
-import { TranslationOutlined } from '@ant-design/icons'
+import { DownOutlined, TranslationOutlined, UpOutlined } from '@ant-design/icons'
+import { useEffect, useRef, useState } from 'react'
 
 import type { TranslationRecord } from '../data/translationData'
 import type { LookupResult } from './translationLookup'
@@ -13,6 +14,16 @@ type Props = {
 
 export default function TranslationCard(props: Props) {
   const { item, results, onDeleteResult, onSentenceSelection } = props
+  const [isLookupResultsExpanded, setIsLookupResultsExpanded] = useState(true)
+  const previousResultsCountRef = useRef(results.length)
+
+  useEffect(() => {
+    if (results.length > previousResultsCountRef.current) {
+      setIsLookupResultsExpanded(true)
+    }
+
+    previousResultsCountRef.current = results.length
+  }, [results.length])
 
   return (
     <div className="select-none rounded-lg border border-[var(--card-border)] bg-white/70 p-4">
@@ -29,7 +40,28 @@ export default function TranslationCard(props: Props) {
           {item.translation}
         </p>
       </div>
-      <LookupResults results={results} onDeleteResult={onDeleteResult} />
+      {results.length > 0 && (
+        <div className="mt-3 rounded-xl bg-slate-50">
+          <button
+            type="button"
+            onClick={() => setIsLookupResultsExpanded((current) => !current)}
+            aria-expanded={isLookupResultsExpanded}
+            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-semibold text-[var(--text-main)] transition"
+          >
+            <span>{`Results (${results.length})`}</span>
+            {isLookupResultsExpanded ? (
+              <UpOutlined aria-hidden="true" className="text-xs text-slate-500" />
+            ) : (
+              <DownOutlined aria-hidden="true" className="text-xs text-slate-500" />
+            )}
+          </button>
+          {isLookupResultsExpanded && (
+            <div className="px-3 pb-3">
+              <LookupResults results={results} onDeleteResult={onDeleteResult} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

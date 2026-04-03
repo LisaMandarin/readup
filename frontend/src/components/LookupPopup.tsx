@@ -11,6 +11,7 @@ type Props = {
   popupCopy: PopupCopy
   lookupOptions: LookupOptionsState
   partOfSpeech: string
+  canLookUp: boolean
   onOptionChange: (option: LookupOptionKey) => void
   onClose: () => void
   onLookUp: () => void
@@ -23,6 +24,7 @@ export default function LookupPopup(props: Props) {
     popupCopy,
     lookupOptions,
     partOfSpeech,
+    canLookUp,
     onOptionChange,
     onClose,
     onLookUp,
@@ -82,8 +84,9 @@ export default function LookupPopup(props: Props) {
         </button>
         <button
           type="button"
-          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition hover:brightness-95"
+          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition enabled:hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onLookUp}
+          disabled={!canLookUp}
         >
           {popupCopy.lookUp}
         </button>

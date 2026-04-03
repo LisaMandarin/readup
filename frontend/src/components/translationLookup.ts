@@ -79,3 +79,9 @@ export const getEnabledOptions = (
   (Object.entries(lookupOptions) as Array<[LookupOptionKey, boolean]>)
     .filter(([, isEnabled]) => isEnabled)
     .map(([option]) => popupCopy[option])
+
+export const hasEnabledLookupOptions = (lookupOptions: LookupOptionsState) =>
+  Object.values(lookupOptions).some(Boolean)
+
+export const getLookupResultId = (uid: number, selectedText: string) =>
+  `${uid}-${normalizeToken(selectedText) || selectedText.trim().toLowerCase()}`

@@ -31,6 +31,7 @@ export default function Translation(props: Props) {
     popupRef,
     lookupOptions,
     lookupResults,
+    canLookUp,
     closePopup,
     handleLookupOptionChange,
     handleLookupResultDelete,
@@ -71,6 +72,7 @@ export default function Translation(props: Props) {
           onOptionChange={handleLookupOptionChange}
           onClose={closePopup}
           onLookUp={handleLookUp}
+          canLookUp={canLookUp}
         />
       )}
     </Card>

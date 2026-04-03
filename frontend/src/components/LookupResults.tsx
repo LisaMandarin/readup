@@ -15,7 +15,7 @@ export default function LookupResults(props: Props) {
       {results.map((result) => (
         <div
           key={result.id}
-          className="relative mt-3 rounded-2xl border border-[var(--card-border)] bg-slate-50 p-4 text-sm text-[var(--text-main)]"
+          className="relative mt-3 rounded-2xl bg-slate-200 p-4 text-sm text-[var(--text-main)] first:mt-0"
         >
           <button
             type="button"

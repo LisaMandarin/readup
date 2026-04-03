@@ -4,8 +4,10 @@ import type { PopupCopy } from '../data/popupCopyByLanguage'
 import type { TranslationRecord } from '../data/translationData'
 import {
   defaultLookupOptions,
+  getLookupResultId,
   getEnabledOptions,
   getLookupMetadata,
+  hasEnabledLookupOptions,
   type LookupOptionKey,
   type LookupOptionsState,
   type LookupResult,
@@ -73,7 +75,7 @@ export default function useTranslationLookup(params: Params) {
   }
 
   const handleLookUp = () => {
-    if (!popup) {
+    if (!popup || !hasEnabledLookupOptions(lookupOptions)) {
       return
     }
 
@@ -82,18 +84,27 @@ export default function useTranslationLookup(params: Params) {
       popup.uid,
       popup.selectedText
     )
+    const resultId = getLookupResultId(popup.uid, popup.selectedText)
+    const nextResult = {
+      uid: popup.uid,
+      id: resultId,
+      selectedText: popup.selectedText,
+      partOfSpeech,
+      lemma,
+      enabledOptions: getEnabledOptions(lookupOptions, popupCopy),
+    }
 
-    setLookupResults((current) => [
-      ...current,
-      {
-        uid: popup.uid,
-        id: `${popup.uid}-${popup.selectedText}-${Date.now()}`,
-        selectedText: popup.selectedText,
-        partOfSpeech,
-        lemma,
-        enabledOptions: getEnabledOptions(lookupOptions, popupCopy),
-      },
-    ])
+    setLookupResults((current) => {
+      const existingIndex = current.findIndex((result) => result.id === resultId)
+
+      if (existingIndex === -1) {
+        return [...current, nextResult]
+      }
+
+      return current.map((result, index) =>
+        index === existingIndex ? nextResult : result
+      )
+    })
 
     window.getSelection()?.removeAllRanges()
     setPopup(null)
@@ -158,6 +169,7 @@ export default function useTranslationLookup(params: Params) {
     popupRef,
     lookupOptions,
     lookupResults,
+    canLookUp: hasEnabledLookupOptions(lookupOptions),
     closePopup,
     handleLookupOptionChange,
     handleLookupResultDelete,
