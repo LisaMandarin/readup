@@ -22,8 +22,8 @@ export default function CollapsiblePanel(props: CollapsiblePanelProps) {
       className={[
         'overflow-hidden rounded-lg bg-[var(--card-bg)] transition-all duration-300 ease-out',
         isOpen
-          ? 'w-72 translate-x-0 p-4 opacity-100'
-          : 'w-0 min-w-0 -translate-x-3 border-transparent p-0 opacity-0',
+          ? 'max-h-[32rem] w-full translate-y-0 p-4 opacity-100 lg:w-72 lg:translate-x-0 lg:translate-y-0'
+          : 'max-h-0 w-full -translate-y-3 border-transparent p-0 opacity-0 lg:w-0 lg:min-w-0 lg:-translate-x-3 lg:translate-y-0',
         className,
       ].join(' ')}
     >
