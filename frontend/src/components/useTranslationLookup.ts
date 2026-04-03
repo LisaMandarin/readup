@@ -68,6 +68,10 @@ export default function useTranslationLookup(params: Params) {
     }))
   }
 
+  const handleLookupResultDelete = (id: string) => {
+    setLookupResults((current) => current.filter((result) => result.id !== id))
+  }
+
   const handleLookUp = () => {
     if (!popup) {
       return
@@ -156,6 +160,7 @@ export default function useTranslationLookup(params: Params) {
     lookupResults,
     closePopup,
     handleLookupOptionChange,
+    handleLookupResultDelete,
     handleLookUp,
     handleSentenceSelection,
   }

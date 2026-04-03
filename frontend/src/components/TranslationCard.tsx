@@ -7,11 +7,12 @@ import LookupResults from './LookupResults'
 type Props = {
   item: TranslationRecord
   results: LookupResult[]
+  onDeleteResult: (id: string) => void
   onSentenceSelection: (uid: number) => void
 }
 
 export default function TranslationCard(props: Props) {
-  const { item, results, onSentenceSelection } = props
+  const { item, results, onDeleteResult, onSentenceSelection } = props
 
   return (
     <div className="select-none rounded-lg border border-[var(--card-border)] bg-white/70 p-4">
@@ -28,7 +29,7 @@ export default function TranslationCard(props: Props) {
           {item.translation}
         </p>
       </div>
-      <LookupResults results={results} />
+      <LookupResults results={results} onDeleteResult={onDeleteResult} />
     </div>
   )
 }

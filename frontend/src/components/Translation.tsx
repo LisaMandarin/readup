@@ -33,6 +33,7 @@ export default function Translation(props: Props) {
     lookupResults,
     closePopup,
     handleLookupOptionChange,
+    handleLookupResultDelete,
     handleLookUp,
     handleSentenceSelection,
   } = useTranslationLookup({
@@ -55,6 +56,7 @@ export default function Translation(props: Props) {
             key={item.uid}
             item={item}
             results={lookupResults.filter((result) => result.uid === item.uid)}
+            onDeleteResult={handleLookupResultDelete}
             onSentenceSelection={handleSentenceSelection}
           />
         ))}

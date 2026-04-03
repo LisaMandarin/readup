@@ -1,19 +1,30 @@
+import { DeleteOutlined } from '@ant-design/icons'
+
 import type { LookupResult } from './translationLookup'
 
 type Props = {
   results: LookupResult[]
+  onDeleteResult: (id: string) => void
 }
 
 export default function LookupResults(props: Props) {
-  const { results } = props
+  const { results, onDeleteResult } = props
 
   return (
     <>
       {results.map((result) => (
         <div
           key={result.id}
-          className="mt-3 rounded-2xl border border-[var(--card-border)] bg-slate-50 p-4 text-sm text-[var(--text-main)]"
+          className="relative mt-3 rounded-2xl border border-[var(--card-border)] bg-slate-50 p-4 text-sm text-[var(--text-main)]"
         >
+          <button
+            type="button"
+            aria-label={`Delete lookup result for ${result.selectedText}`}
+            onClick={() => onDeleteResult(result.id)}
+            className="absolute top-3 right-3 p-2 text-sm text-slate-600 transition hover:border-red-300 hover:text-red-600"
+          >
+            <DeleteOutlined />
+          </button>
           <div className="space-y-3">
             <div>
               <p className="m-0 text-base font-semibold text-[var(--text-main)]">
