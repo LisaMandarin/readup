@@ -1,49 +1,65 @@
-import { useEffect, useState } from 'react'
-import { Card, List, Typography, Empty, Spin, Button, message } from 'antd'
-import { HistoryOutlined, ReloadOutlined } from '@ant-design/icons'
-import { getUserSessions, type SessionResponse } from '../api/sessions'
+import { useEffect, useState } from "react";
+import { Card, List, Typography, Empty, Spin, Button, message } from "antd";
+import { HistoryOutlined, ReloadOutlined } from "@ant-design/icons";
+import { getUserSessions, type SessionResponse } from "../api/sessions";
 
-const { Title, Text } = Typography
+const { Title, Text } = Typography;
 
 interface Props {
-  onSessionSelect?: (session: SessionResponse) => void
-  selectedSessionId?: number | null
+  onSessionSelect?: (session: SessionResponse) => void;
+  selectedSessionId?: number | null;
 }
 
-export default function SessionHistory({ onSessionSelect, selectedSessionId }: Props) {
-  const [sessions, setSessions] = useState<SessionResponse[]>([])
-  const [loading, setLoading] = useState(true)
+export default function SessionHistory({
+  onSessionSelect,
+  selectedSessionId,
+}: Props) {
+  const [sessions, setSessions] = useState<SessionResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const loadSessions = async () => {
     try {
-      setLoading(true)
-      const { data } = await getUserSessions()
-      setSessions(data)
+      setLoading(true);
+      const { data } = await getUserSessions();
+      setSessions(data);
     } catch (error) {
-      console.error('Error loading sessions:', error)
-      message.error('Failed to load session history')
+      console.error("Error loading sessions:", error);
+      message.error("Failed to load session history");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    void loadSessions()
-  }, [])
+    void loadSessions();
+  }, []);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60)
-    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours =
+      Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
     if (diffInHours < 24) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else if (diffInHours < 24 * 7) {
-      return date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleDateString([], {
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
-  }
+  };
 
   return (
     <Card
@@ -93,10 +109,12 @@ export default function SessionHistory({ onSessionSelect, selectedSessionId }: P
           renderItem={(session) => (
             <List.Item
               className={`cursor-pointer transition-colors hover:bg-gray-50 ${
-                selectedSessionId === session.id ? 'bg-blue-50 border-l-2 border-blue-500' : ''
+                selectedSessionId === session.id
+                  ? "bg-blue-50 border-l-2 border-blue-500"
+                  : ""
               }`}
               onClick={() => onSessionSelect?.(session)}
-              style={{ padding: '8px 12px' }}
+              style={{ padding: "8px 12px" }}
             >
               <div className="w-full">
                 <div className="flex justify-between items-start mb-1">
@@ -113,5 +131,5 @@ export default function SessionHistory({ onSessionSelect, selectedSessionId }: P
         />
       )}
     </Card>
-  )
+  );
 }

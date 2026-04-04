@@ -124,16 +124,6 @@ export default function SignIn() {
               <strong>Sign Up</strong>
             </Link>
           </Text>
-          
-          {/* DEMO LINK - REMOVE AFTER MEETING */}
-          <br />
-          <Text type="secondary" style={{ marginTop: 8, display: "block" }}>
-            Or view the{" "}
-            <Link to="/demo">
-              <strong>Session History Demo</strong>
-            </Link>
-          </Text>
-          {/* END DEMO LINK */}
         </div>
       </Card>
     </div>
