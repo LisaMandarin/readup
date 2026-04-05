@@ -1,8 +1,14 @@
-import { TranslationOutlined } from '@ant-design/icons'
 import { Card } from 'antd'
 
-import targetLanguageNames from './targetLanguageNames.json'
-import type { TranslationRecord } from './translationData'
+import LookupPopup from './LookupPopup'
+import TranslationCard from './TranslationCard'
+import {
+  getLookupMetadata,
+} from './translationLookup'
+import useTranslationLookup from './useTranslationLookup'
+import targetLanguageNames from '../data/targetLanguageNames.json'
+import popupCopyByLanguage from '../data/popupCopyByLanguage'
+import type { TranslationRecord } from '../data/translationData'
 
 type Props = {
   translations: TranslationRecord[]
@@ -10,13 +16,34 @@ type Props = {
 
 export default function Translation(props: Props) {
   const { translations } = props
+  const firstTranslation = translations[0]
 
-  if (translations.length === 0) {
+  if (!firstTranslation) {
     return null
   }
 
+  const targetLanguage = firstTranslation.targetLanguage
   const languageLabel =
-    targetLanguageNames[translations[0].targetLanguage].targetLanguageName
+    targetLanguageNames[targetLanguage].targetLanguageName
+  const popupCopy = popupCopyByLanguage[targetLanguage]
+  const {
+    popup,
+    popupRef,
+    lookupOptions,
+    lookupResults,
+    canLookUp,
+    closePopup,
+    handleLookupOptionChange,
+    handleLookupResultDelete,
+    handleLookUp,
+    handleSentenceSelection,
+  } = useTranslationLookup({
+    translations,
+    popupCopy,
+  })
+  const popupMetadata = popup
+    ? getLookupMetadata(translations, popup.uid, popup.selectedText)
+    : null
 
   return (
     <Card
@@ -26,22 +53,28 @@ export default function Translation(props: Props) {
     >
       <div className="space-y-4">
         {translations.map((item) => (
-          <div
+          <TranslationCard
             key={item.uid}
-            className="rounded-lg border border-[var(--card-border)] bg-white/70 p-4"
-          >
-            <p className="m-0 text-sm leading-6 text-[var(--text-main)]">
-              {item.sentence}
-            </p>
-            <div className="mt-3 flex items-start gap-3 rounded-md bg-[rgba(15,95,92,0.08)] px-3 py-3 text-slate-700">
-              <TranslationOutlined className="mt-1 text-base text-[var(--accent)]" />
-              <p className="m-0 text-sm leading-6">
-                {item.translation}
-              </p>
-            </div>
-          </div>
+            item={item}
+            results={lookupResults.filter((result) => result.uid === item.uid)}
+            onDeleteResult={handleLookupResultDelete}
+            onSentenceSelection={handleSentenceSelection}
+          />
         ))}
       </div>
+      {popup && (
+        <LookupPopup
+          popup={popup}
+          popupRef={popupRef}
+          popupCopy={popupCopy}
+          lookupOptions={lookupOptions}
+          partOfSpeech={popupMetadata?.partOfSpeech ?? 'Unknown'}
+          onOptionChange={handleLookupOptionChange}
+          onClose={closePopup}
+          onLookUp={handleLookUp}
+          canLookUp={canLookUp}
+        />
+      )}
     </Card>
   )
 }

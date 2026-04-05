@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { UpOutlined } from '@ant-design/icons'
+import { useEffect, useState } from 'react'
 import { Alert, ConfigProvider, Spin } from 'antd'
 import translationData, {
   type TranslationRecord,
-} from '../components/translationData'
-import sessionHistoryData from '../components/sessionHistoryData'
+} from '../data/translationData'
+import sessionHistoryData from '../data/sessionHistoryData'
 import { useAuth } from '../context/AuthContext'
 import type { TargetLanguage } from '../components/targetLanguages'
 import MainContent from './MainContent'
@@ -18,6 +19,20 @@ export default function Home() {
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
   const [translations, setTranslations] = useState<TranslationRecord[]>([])
+  const [isBackToTopVisible, setIsBackToTopVisible] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsBackToTopVisible(window.scrollY > 240)
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   const handleMenuSelect = (key: MenuKey) => {
     setActiveMenu((currentKey) => (currentKey === key ? null : key))
@@ -76,6 +91,13 @@ export default function Home() {
   const handleTargetLanguageChange = (value: TargetLanguage | '') => {
     setTargetLanguage(value)
     setTranslations([])
+  }
+
+  const handleBackToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
   }
 
   return (
@@ -139,6 +161,20 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        <button
+          type="button"
+          aria-label="Back to top"
+          onClick={handleBackToTop}
+          className={[
+            'fixed right-6 bottom-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--accent)] text-lg text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:brightness-95',
+            isBackToTopVisible
+              ? 'pointer-events-auto translate-y-0 opacity-100'
+              : 'pointer-events-none translate-y-3 opacity-0',
+          ].join(' ')}
+        >
+          <UpOutlined />
+        </button>
       </div>
     </ConfigProvider>
   )
