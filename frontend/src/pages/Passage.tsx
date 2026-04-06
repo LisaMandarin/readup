@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react'
-import { Input, Button, Space } from 'antd'
+import { Input, Button,} from 'antd'
 import { ClearOutlined } from '@ant-design/icons'
 import TranslateButton from '../components/TranslateButton'
 import type { TextAreaRef } from 'antd/es/input/TextArea'
+import type { TargetLanguage } from '../components/targetLanguages'
 
 const { TextArea } = Input
 
