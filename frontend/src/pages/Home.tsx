@@ -1,66 +1,84 @@
 import { useState } from 'react'
-import { Alert, ConfigProvider, Spin } from 'antd'
-import translationData, {
-  type TranslationRecord,
-} from '../components/translationData'
-import sessionHistoryData from '../components/sessionHistoryData'
+import { Alert, ConfigProvider, Spin, message } from 'antd'
 import { useAuth } from '../context/AuthContext'
 import type { TargetLanguage } from '../components/targetLanguages'
-import MainContent from './MainContent'
+import MainContent, { type TranslationRecord } from './MainContent'
 import Sidebar from './Sidebar'
 import type { MenuKey } from './homeTypes'
+import { translateText } from '../api/translate'
+import { getSessionById } from '../api/session'
 
 export default function Home() {
   const { user } = useAuth()
+
   const [passage, setPassage] = useState('')
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage | ''>('')
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
   const [translations, setTranslations] = useState<TranslationRecord[]>([])
+  const [isTranslating, setIsTranslating] = useState(false)
 
-  const handleMenuSelect = (key: MenuKey) => {
-    setActiveMenu((currentKey) => (currentKey === key ? null : key))
+  const isValidTargetLanguage = (
+    value: TargetLanguage | ''
+  ): value is TargetLanguage => {
+    return value !== ''
   }
 
-  const handleTranslate = () => {
-    if (passage.trim().length === 0 || targetLanguage.length === 0) {
+  const handleMenuSelect = (key: MenuKey | null) => {
+  setActiveMenu(key)
+}
+
+  const handleTranslate = async () => {
+    if (passage.trim().length === 0) {
+      message.warning('Please enter a passage.')
       return
     }
 
-    const selectedSession = translationData.find(
-      (item) => item.targetLanguage === targetLanguage
-    )
+    if (!isValidTargetLanguage(targetLanguage)) {
+      message.warning('Please select a target language.')
+      return
+    }
 
-    if (!selectedSession) {
+    try {
+      setIsTranslating(true)
+
+      const { data } = await translateText({
+        passage,
+        targetLanguage,
+      })
+
+      setTranslations(data.translations)
+      message.success('Translation completed successfully.')
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { detail?: string } }
+      }
+
+      console.error('Translation failed:', err.response?.data || error)
+
+      const detail = err.response?.data?.detail
+      message.error(
+        typeof detail === 'string' ? detail : 'Translation failed.'
+      )
       setTranslations([])
-      return
+    } finally {
+      setIsTranslating(false)
     }
-
-    const nextTranslations = translationData.filter(
-      (item) => item.sessionID === selectedSession.sessionID
-    )
-
-    setTranslations(nextTranslations)
   }
 
-  const handleSessionSelect = (sessionID: string) => {
-    const selectedSession = sessionHistoryData.find(
-      (item) => item.sessionID === sessionID
-    )
+  const handleSessionSelect = async (sessionID: string) => {
+    try {
+      const { data } = await getSessionById(sessionID)
 
-    const nextTranslations = translationData.filter(
-      (item) => item.sessionID === sessionID
-    )
-
-    if (!selectedSession || nextTranslations.length === 0) {
+      setPassage(data.session.fullPassage)
+      setTargetLanguage(data.session.targetLanguage as TargetLanguage)
+      setTranslations(data.translations)
+    } catch (error) {
+      console.error('Failed to load session:', error)
+      message.error('Failed to load session.')
       setTranslations([])
-      return
     }
-
-    setPassage(selectedSession.passage)
-    setTargetLanguage(selectedSession.targetLanguage)
-    setTranslations(nextTranslations)
   }
 
   const handlePassageChange = (value: string) => {
@@ -129,12 +147,12 @@ export default function Home() {
           </footer>
         </div>
 
-        {isSigningOut && (
+        {(isSigningOut || isTranslating) && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-[rgba(243,250,250,0.5)] backdrop-blur-[1px]">
             <div className="rounded-2xl border border-[rgba(127,29,29,0.18)] bg-white/90 px-8 py-6 text-center shadow-lg">
               <Spin size="large" />
               <p className="mt-4 mb-0 text-sm font-medium text-[var(--text-main)]">
-                Signing you out...
+                {isSigningOut ? 'Signing you out...' : 'Translating...'}
               </p>
             </div>
           </div>

@@ -1,9 +1,16 @@
 import type { TargetLanguage } from '../components/targetLanguages'
-import type { TranslationRecord } from '../components/translationData'
 import Translation from '../components/Translation'
 import Passage from './Passage'
 
-type MainContentColumnProps = {
+export type TranslationRecord = {
+  uid: number
+  sentence: string
+  translation: string
+  lemma: string[]
+  pos: string[]
+}
+
+type MainContentProps = {
   passage: string
   targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
@@ -12,17 +19,18 @@ type MainContentColumnProps = {
   translations: TranslationRecord[]
 }
 
-type MainContentProps = MainContentColumnProps
-
-export default function MainContent(props: MainContentProps) {
-  const { passage, targetLanguage, onPassageChange, onTranslate, onClear } = props
-
+export default function MainContent({
+  passage,
+  targetLanguage,
+  onPassageChange,
+  onTranslate,
+  onClear,
+  translations,
+}: MainContentProps) {
   return (
     <main className="flex-1 rounded-lg border-4 border-[var(--card-border)] p-4">
-      <div className="mb-4">
-      </div>
-
       <h1 className="m-4 text-center text-4xl font-extrabold">Read Up</h1>
+
       <p className="text-center">
         Turn any text into an interactive learning experience — translate,
         explore vocabulary, and truly understand what you read.
@@ -36,7 +44,10 @@ export default function MainContent(props: MainContentProps) {
         onClear={onClear}
       />
 
-      <Translation translations={props.translations} />
+      <Translation
+        translations={translations}
+        targetLanguage={targetLanguage}
+      />
     </main>
   )
 }

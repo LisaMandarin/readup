@@ -1,12 +1,24 @@
-import targetLanguageNames from './targetLanguageNames.json'
+export type TargetLanguage =
+  | 'spanish'
+  | 'french'
+  | 'chinese'
+  | 'german'
+  | 'portuguese'
+  | 'japanese'
 
-export type TargetLanguage = keyof typeof targetLanguageNames
+export const targetLanguageOptions: Array<{
+  value: TargetLanguage
+  label: string
+}> = [
+  { value: 'spanish', label: 'Spanish' },
+  { value: 'french', label: 'French' },
+  { value: 'chinese', label: 'Chinese' },
+  { value: 'german', label: 'German' },
+  { value: 'portuguese', label: 'Portuguese' },
+  { value: 'japanese', label: 'Japanese' },
+]
 
-export const targetLanguageOptions = (
-  Object.entries(targetLanguageNames) as Array<
-    [TargetLanguage, (typeof targetLanguageNames)[TargetLanguage]]
-  >
-).map(([value, content]) => ({
-  label: content.targetLanguageName,
-  value,
-}))
+export function getTargetLanguageLabel(value: string): string {
+  const match = targetLanguageOptions.find((item) => item.value === value)
+  return match?.label ?? value
+}

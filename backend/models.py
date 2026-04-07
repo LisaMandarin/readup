@@ -1,12 +1,14 @@
 import uuid
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
+
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, JSON
+from sqlalchemy.orm import relationship
+
 from database import Base
 
 
-def generate_session_id():
-    return f"session-{uuid.uuid4().hex[:4]}"
+def generate_session_id() -> str:
+    return str(uuid.uuid4())
 
 
 class User(Base):
@@ -15,7 +17,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=True)  # Not used — Supabase handles passwords
+    hashed_password = Column(String, nullable=True)
     created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -23,22 +25,25 @@ class User(Base):
 
     sessions = relationship("TranslationSession", back_populates="user")
 
-    def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}')>"
-
 
 class TranslationSession(Base):
     __tablename__ = "translation_sessions"
 
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(
-        String(20), unique=True, index=True, nullable=False,
+        String(64),
+        unique=True,
+        index=True,
+        nullable=False,
         default=generate_session_id,
     )
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    title = Column(String(200), nullable=False)
-    passage = Column(Text, nullable=False)
-    target_language = Column(String(30), nullable=False)
+
+    title = Column(String(255), nullable=False)
+    passage_preview = Column(String(255), nullable=False)
+    full_passage = Column(Text, nullable=False)
+    target_language = Column(String(50), nullable=False)
+
     created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -54,6 +59,7 @@ class TranslationSession(Base):
         "SentenceTranslation",
         back_populates="session",
         order_by="SentenceTranslation.uid",
+        cascade="all, delete-orphan",
     )
 
 
@@ -62,11 +68,15 @@ class SentenceTranslation(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     uid = Column(Integer, nullable=False)
+
     sentence = Column(Text, nullable=False)
     translation = Column(Text, nullable=False)
-    target_language = Column(String(30), nullable=False)
+
+    lemma = Column(JSON, nullable=False)
+    pos = Column(JSON, nullable=False)
+
     session_id = Column(
-        String(20),
+        String(64),
         ForeignKey("translation_sessions.session_id"),
         nullable=False,
     )

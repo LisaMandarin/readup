@@ -9,13 +9,18 @@ import {
   Spin,
   Card,
   Tooltip,
+  Divider,
 } from "antd";
-import { TranslationOutlined, SwapOutlined, CopyOutlined } from "@ant-design/icons";
+import {
+  TranslationOutlined,
+  CopyOutlined,
+} from "@ant-design/icons";
 import {
   getLanguages,
   translateText,
   type Language,
   type TranslateResponse,
+  type TargetLanguage,
 } from "../api/translate";
 
 const { Text, Paragraph } = Typography;
@@ -32,14 +37,12 @@ export default function TranslateButton({
   const [open, setOpen] = useState(false);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [loadingLangs, setLoadingLangs] = useState(false);
-  const [targetLang, setTargetLang] = useState("es");
+  const [targetLang, setTargetLang] = useState<TargetLanguage>("spanish");
   const [translating, setTranslating] = useState(false);
   const [result, setResult] = useState<TranslateResponse | null>(null);
 
-  // The text we'll translate: selected text or the full passage
   const textToTranslate = selectedText?.trim() || passage.trim();
 
-  // Fetch languages when modal opens
   useEffect(() => {
     if (open && languages.length === 0) {
       setLoadingLangs(true);
@@ -61,27 +64,38 @@ export default function TranslateButton({
 
     try {
       const { data } = await translateText({
-        text: textToTranslate,
-        source_language: "auto",
-        target_language: targetLang,
+        passage: textToTranslate,
+        targetLanguage: targetLang,
       });
       setResult(data);
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { detail?: string } } };
+      const error = err as {
+        response?: { data?: { detail?: unknown } };
+      };
+
+      console.error("Translate error:", error.response?.data || err);
+
       const detail = error.response?.data?.detail;
-      message.error(
-        typeof detail === "string" ? detail : "Translation failed"
-      );
+
+      if (typeof detail === "string") {
+        message.error(detail);
+      } else {
+        message.error("Translation failed");
+      }
     } finally {
       setTranslating(false);
     }
   };
 
   const handleCopy = () => {
-    if (result?.translated_text) {
-      navigator.clipboard.writeText(result.translated_text);
-      message.success("Copied to clipboard!");
-    }
+    if (!result?.translations?.length) return;
+
+    const joined = result.translations
+      .map((item) => item.translation)
+      .join(" ");
+
+    navigator.clipboard.writeText(joined);
+    message.success("Copied to clipboard!");
   };
 
   const handleOpen = () => {
@@ -98,7 +112,6 @@ export default function TranslateButton({
     setResult(null);
   };
 
-  // Find language name by code
   const getLangName = (code: string) =>
     languages.find((l) => l.code === code)?.name || code;
 
@@ -126,10 +139,9 @@ export default function TranslateButton({
         open={open}
         onCancel={handleClose}
         footer={null}
-        width={640}
+        width={750}
         destroyOnClose
       >
-        {/* Source text preview */}
         <div style={{ marginBottom: 16 }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
             {selectedText ? "Selected text" : "Full passage"} •{" "}
@@ -153,28 +165,22 @@ export default function TranslateButton({
           </Card>
         </div>
 
-        {/* Language selector + Translate button */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 12,
             marginBottom: 20,
+            flexWrap: "wrap",
           }}
         >
-          <Text style={{ whiteSpace: "nowrap" }}>Auto-detect</Text>
-
-          <SwapOutlined style={{ fontSize: 18, color: "#999" }} />
-
           {loadingLangs ? (
             <Spin size="small" />
           ) : (
             <Select
               value={targetLang}
-              onChange={setTargetLang}
-              style={{ width: 200 }}
-              showSearch
-              optionFilterProp="label"
+              onChange={(value) => setTargetLang(value as TargetLanguage)}
+              style={{ width: 220 }}
               options={languages.map((lang) => ({
                 value: lang.code,
                 label: lang.name,
@@ -192,7 +198,6 @@ export default function TranslateButton({
           </Button>
         </div>
 
-        {/* Translation result */}
         {translating && (
           <div style={{ textAlign: "center", padding: "24px 0" }}>
             <Spin size="large" />
@@ -209,13 +214,13 @@ export default function TranslateButton({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 4,
+                marginBottom: 8,
               }}
             >
               <Text type="secondary" style={{ fontSize: 12 }}>
-                Translated to {getLangName(result.target_language)}
+                Translated to {getLangName(result.session.targetLanguage)}
               </Text>
-              <Tooltip title="Copy translation">
+              <Tooltip title="Copy full translation">
                 <Button
                   icon={<CopyOutlined />}
                   size="small"
@@ -224,24 +229,50 @@ export default function TranslateButton({
                 />
               </Tooltip>
             </div>
+
             <Card
               size="small"
               style={{
                 background: "#f0f5ff",
                 borderColor: "#adc6ff",
-                maxHeight: 200,
+                maxHeight: 350,
                 overflow: "auto",
               }}
             >
-              <Paragraph
-                style={{
-                  marginBottom: 0,
-                  whiteSpace: "pre-wrap",
-                  fontSize: 15,
-                }}
-              >
-                {result.translated_text}
-              </Paragraph>
+              {result.translations.map((item) => (
+                <div key={item.uid} style={{ marginBottom: 20 }}>
+                  <Paragraph
+                    style={{
+                      marginBottom: 4,
+                      color: "#666",
+                      fontSize: 13,
+                    }}
+                  >
+                    {item.sentence}
+                  </Paragraph>
+
+                  <Paragraph
+                    style={{
+                      marginBottom: 8,
+                      whiteSpace: "pre-wrap",
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {item.translation}
+                  </Paragraph>
+
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Lemma: {item.lemma.join(", ")}
+                  </Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    POS: {item.pos.join(", ")}
+                  </Text>
+
+                  <Divider style={{ margin: "12px 0" }} />
+                </div>
+              ))}
             </Card>
           </div>
         )}

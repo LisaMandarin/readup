@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, field_validator, model_validator
 
 
@@ -55,8 +56,10 @@ class VerifyRequest(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("Verification code is required")
-        if len(v) != 6 or not v.isdigit():
-            raise ValueError("Verification code must be 6 digits")
+        if not v.isdigit():
+            raise ValueError("Verification code must contain only digits")
+        if len(v) not in (6, 8):
+            raise ValueError("Verification code must be 6 or 8 digits")
         return v
 
 
@@ -98,9 +101,16 @@ class MessageResponse(BaseModel):
     message: str
 
 
-# ── Translation Schemas ────────────────────────────────────
+# ── Translation / Session Schemas ──────────────────────────
 
-SUPPORTED_LANGUAGES = ["spanish", "french", "chinese", "japanese"]
+SUPPORTED_LANGUAGES = [
+    "spanish",
+    "french",
+    "chinese",
+    "german",
+    "portuguese",
+    "japanese",
+]
 
 
 class TranslateRequest(BaseModel):
@@ -111,17 +121,21 @@ class TranslateRequest(BaseModel):
     @model_validator(mode="after")
     def normalize_target_language(self):
         value = self.targetLanguage or self.target_language
+
         if not value:
             raise ValueError(
                 "Target language is required. "
                 "Send 'targetLanguage' or 'target_language'."
             )
+
         value = value.strip().lower()
+
         if value not in SUPPORTED_LANGUAGES:
             raise ValueError(
                 f"Unsupported language: '{value}'. "
                 f"Choose from: {', '.join(SUPPORTED_LANGUAGES)}"
             )
+
         self.targetLanguage = value
         self.target_language = value
         return self
@@ -141,8 +155,8 @@ class SentenceTranslationResponse(BaseModel):
     uid: int
     sentence: str
     translation: str
-    targetLanguage: str
-    sessionID: str
+    lemma: list[str]
+    pos: list[str]
 
     class Config:
         from_attributes = True
@@ -152,7 +166,8 @@ class SessionResponse(BaseModel):
     sessionID: str
     userID: str
     title: str
-    passage: str
+    passagePreview: str
+    fullPassage: str
     targetLanguage: str
     createdAt: datetime
     updatedAt: datetime
@@ -169,6 +184,7 @@ class TranslateFullResponse(BaseModel):
 class SessionListItem(BaseModel):
     sessionID: str
     title: str
+    passagePreview: str
     targetLanguage: str
     createdAt: datetime
 

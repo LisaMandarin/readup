@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from routers.auth_router import router as auth_router
-from routers.translate_router import router as translate_router
+from routers.translate_router import router as translation_router
+from routers.session_router import router as session_router
 
-# Create tables in Supabase if they don't exist yet
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ReadUp Backend", version="0.1.0")
@@ -24,7 +24,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(translate_router)
+app.include_router(translation_router)
+app.include_router(session_router)
 
 
 @app.get("/health")

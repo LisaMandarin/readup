@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Tooltip } from 'antd'
 import {
   FolderOutlined,
@@ -18,7 +19,7 @@ import type { MenuKey } from './homeTypes'
 
 type SidebarProps = {
   activeMenu: MenuKey | null
-  onMenuSelect: (key: MenuKey) => void
+  onMenuSelect: (key: MenuKey | null) => void
   username?: string
   email?: string
   passage: string
@@ -41,15 +42,19 @@ export default function Sidebar(props: SidebarProps) {
     onSignOutStateChange,
     onSignOutError,
   } = props
+
   const { logout } = useAuth()
+  const navigate = useNavigate()
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const handleConfirmSignOut = () => {
+
+  const handleConfirmSignOut = async () => {
     setIsSigningOut(true)
     onSignOutError(null)
     onSignOutStateChange(true)
 
     try {
       logout()
+      navigate('/signin', { replace: true })
     } catch (error) {
       setIsSigningOut(false)
       onSignOutStateChange(false)
@@ -59,6 +64,14 @@ export default function Sidebar(props: SidebarProps) {
           : 'We could not sign you out. Please try again.'
       )
     }
+  }
+
+  const handleCancelSignOut = () => {
+    onMenuSelect(null)
+  }
+
+  const handleMenuClick = (key: MenuKey) => {
+    onMenuSelect(activeMenu === key ? null : key)
   }
 
   const menuItems: Array<{
@@ -84,7 +97,7 @@ export default function Sidebar(props: SidebarProps) {
                 <Tooltip key={item.key} title={item.label} placement="right">
                   <button
                     type="button"
-                    onClick={() => onMenuSelect(item.key)}
+                    onClick={() => handleMenuClick(item.key)}
                     aria-label={item.label}
                     aria-pressed={isActive}
                     className={[
@@ -125,7 +138,7 @@ export default function Sidebar(props: SidebarProps) {
                 <SignOutPanelItem
                   isSigningOut={isSigningOut}
                   onConfirm={handleConfirmSignOut}
-                  onCancel={() => onMenuSelect('signout')}
+                  onCancel={handleCancelSignOut}
                 />
               )}
             </div>

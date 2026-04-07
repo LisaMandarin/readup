@@ -1,10 +1,10 @@
 import { Select } from 'antd'
 
 import { CollapsiblePanelItem } from './CollapsiblePanel'
-import targetLanguageNames from './targetLanguageNames.json'
 import {
   targetLanguageOptions,
   type TargetLanguage,
+  getTargetLanguageLabel,
 } from './targetLanguages'
 
 type SettingsPanelItemProps = {
@@ -12,12 +12,13 @@ type SettingsPanelItemProps = {
   onTargetLanguageChange: (value: TargetLanguage | '') => void
 }
 
-export default function SettingsPanelItem(props: SettingsPanelItemProps) {
-  const { targetLanguage, onTargetLanguageChange } = props
-
-  const selectedLanguageLabel =
-    (targetLanguage ? targetLanguageNames[targetLanguage].targetLanguageName : undefined) ??
-    'Not selected'
+export default function SettingsPanelItem({
+  targetLanguage,
+  onTargetLanguageChange,
+}: SettingsPanelItemProps) {
+  const selectedLanguageLabel = targetLanguage
+    ? getTargetLanguageLabel(targetLanguage)
+    : 'Not selected'
 
   return (
     <CollapsiblePanelItem
@@ -34,9 +35,9 @@ export default function SettingsPanelItem(props: SettingsPanelItemProps) {
 
         <Select
           id="target-language-select"
-          value={targetLanguage}
+          value={targetLanguage || undefined}
           options={targetLanguageOptions}
-          onChange={(value) => onTargetLanguageChange(value ?? '')}
+          onChange={(value) => onTargetLanguageChange((value ?? '') as TargetLanguage | '')}
           className="w-full"
           size="large"
           placeholder="Select a target language"
@@ -44,7 +45,8 @@ export default function SettingsPanelItem(props: SettingsPanelItemProps) {
         />
 
         <p className="m-0 text-sm text-slate-600">
-          Current selection: <span className="font-medium">{selectedLanguageLabel}</span>
+          Current selection:{' '}
+          <span className="font-medium">{selectedLanguageLabel}</span>
         </p>
       </div>
     </CollapsiblePanelItem>

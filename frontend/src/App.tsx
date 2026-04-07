@@ -6,6 +6,8 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import SignOut from "./pages/SignOut";
 import Home from "./pages/Home";
+import SessionHistory from "./pages/SessionHistory";
+import SessionDetail from "./pages/SessionDetail";
 
 function App() {
   return (
@@ -13,14 +15,10 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-
-            {/* Sign-out page (needs token to show confirmation) */}
             <Route path="/signout" element={<SignOut />} />
 
-            {/* Protected routes */}
             <Route
               path="/"
               element={
@@ -30,7 +28,24 @@ function App() {
               }
             />
 
-            {/* Catch-all */}
+            <Route
+              path="/sessions"
+              element={
+                <ProtectedRoute>
+                  <SessionHistory />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/sessions/:sessionId"
+              element={
+                <ProtectedRoute>
+                  <SessionDetail />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

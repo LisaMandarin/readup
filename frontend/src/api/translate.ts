@@ -1,29 +1,47 @@
 import API from "./auth";
 
-// ── Types ─────────────────────────────────────────────────
-
 export interface Language {
   code: string;
   name: string;
 }
 
-export interface TranslateRequest {
-  text: string;
-  source_language: string;
-  target_language: string;
+export type TargetLanguage =
+  | "spanish"
+  | "french"
+  | "chinese"
+  | "german"
+  | "portuguese"
+  | "japanese";
+
+export interface TranslationItem {
+  uid: number;
+  sentence: string;
+  translation: string;
+  lemma: string[];
+  pos: string[];
+}
+
+export interface TranslationSession {
+  sessionID: string;
+  userID: string;
+  title: string;
+  passagePreview: string;
+  fullPassage: string;
+  targetLanguage: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TranslateResponse {
-  original_text: string;
-  translated_text: string;
-  source_language: string;
-  target_language: string;
+  session: TranslationSession;
+  translations: TranslationItem[];
 }
 
-// ── API Calls ─────────────────────────────────────────────
-
 export const getLanguages = () =>
-  API.get<Language[]>("/translate/languages");
+  API.get<Language[]>("/api/translate/languages");
 
-export const translateText = (data: TranslateRequest) =>
-  API.post<TranslateResponse>("/translate/", data);
+export const translateText = (data: {
+  passage: string;
+  targetLanguage: TargetLanguage;
+}) =>
+  API.post<TranslateResponse>("/api/translate", data);

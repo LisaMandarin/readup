@@ -1,8 +1,10 @@
+import { useEffect, useState } from 'react'
 import { format, formatDistanceToNowStrict, isToday, isValid } from 'date-fns'
-import targetLanguageNames from './targetLanguageNames.json'
+import { Spin, message } from 'antd'
 
 import { CollapsiblePanelItem } from './CollapsiblePanel'
-import sessionHistoryData from './sessionHistoryData'
+import { getSessions, type SessionListItem } from '../api/session'
+import { getTargetLanguageLabel } from './targetLanguages'
 
 type SessionPanelItemProps = {
   onSessionSelect: (sessionID: string) => void
@@ -14,7 +16,6 @@ function truncateText(value: string, maxLength: number) {
 
 function toValidDate(value: Date | string) {
   const normalizedDate = value instanceof Date ? value : new Date(value)
-
   return isValid(normalizedDate) ? normalizedDate : null
 }
 
@@ -25,7 +26,9 @@ function formatSessionUpdatedAt(updatedAt: Date | string) {
     return 'Unknown update time'
   }
 
-  const minutesSinceUpdate = Math.floor((Date.now() - normalizedDate.getTime()) / 60000)
+  const minutesSinceUpdate = Math.floor(
+    (Date.now() - normalizedDate.getTime()) / 60000
+  )
 
   if (isToday(normalizedDate) && minutesSinceUpdate >= 0 && minutesSinceUpdate < 60) {
     return formatDistanceToNowStrict(normalizedDate, { addSuffix: true })
@@ -38,13 +41,35 @@ function formatSessionUpdatedAt(updatedAt: Date | string) {
   return format(normalizedDate, 'MMM d, yyyy p')
 }
 
-export default function SessionPanelItem(props: SessionPanelItemProps) {
-  const { onSessionSelect } = props
-  const sessions = [...sessionHistoryData].sort(
-    (left, right) =>
-      (toValidDate(right.updatedAt)?.getTime() ?? 0) -
-      (toValidDate(left.updatedAt)?.getTime() ?? 0)
-  )
+export default function SessionPanelItem({
+  onSessionSelect,
+}: SessionPanelItemProps) {
+  const [sessions, setSessions] = useState<SessionListItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        setLoading(true)
+        const { data } = await getSessions()
+
+        const sortedSessions = [...data].sort(
+          (left, right) =>
+            (toValidDate(right.createdAt)?.getTime() ?? 0) -
+            (toValidDate(left.createdAt)?.getTime() ?? 0)
+        )
+
+        setSessions(sortedSessions)
+      } catch (error) {
+        console.error('Failed to load sessions:', error)
+        message.error('Failed to load sessions.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSessions()
+  }, [])
 
   return (
     <CollapsiblePanelItem
@@ -52,7 +77,11 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
       description="Your previous work is tracked here. Click a session to continue working."
       className="border-[rgba(24,57,57,0.18)]"
     >
-      {sessions.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-6">
+          <Spin />
+        </div>
+      ) : sessions.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[rgba(24,57,57,0.18)] bg-[rgba(24,57,57,0.04)] px-4 py-6 text-center">
           <p className="m-0 text-sm font-medium text-[var(--text-main)]">
             No sessions have been retrieved yet.
@@ -76,19 +105,16 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
                     {truncateText(session.title, 15)}
                   </p>
                   <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
-                    {
-                      targetLanguageNames[session.targetLanguage]
-                        .targetLanguageName
-                    }
+                    {getTargetLanguageLabel(session.targetLanguage)}
                   </span>
                 </div>
 
                 <p className="m-0 text-sm leading-6 text-slate-600">
-                  {truncateText(session.passage, 100)}
+                  {truncateText(session.passagePreview, 100)}
                 </p>
 
                 <p className="m-0 text-xs text-slate-500">
-                  {formatSessionUpdatedAt(session.updatedAt)}
+                  {formatSessionUpdatedAt(session.createdAt)}
                 </p>
               </div>
             </button>
