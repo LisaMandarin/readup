@@ -3,24 +3,19 @@ import { Input, Button } from 'antd'
 import { ClearOutlined } from '@ant-design/icons'
 import TranslateButton from '../components/TranslateButton'
 import type { TextAreaRef } from 'antd/es/input/TextArea'
-import type { TargetLanguage } from '../components/targetLanguages'
 
 const { TextArea } = Input
 
 interface PassageProps {
   passage: string
-  targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
-  onTranslate: () => void
   onClear: () => void
   translating?: boolean
 }
 
 export default function Passage({
   passage,
-  targetLanguage,
   onPassageChange,
-  onTranslate,
   onClear,
   translating = false,
 }: PassageProps) {

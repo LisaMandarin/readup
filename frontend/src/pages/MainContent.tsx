@@ -23,7 +23,6 @@ export default function MainContent({
   passage,
   targetLanguage,
   onPassageChange,
-  onTranslate,
   onClear,
   translations,
 }: MainContentProps) {
@@ -38,9 +37,7 @@ export default function MainContent({
 
       <Passage
         passage={passage}
-        targetLanguage={targetLanguage}
         onPassageChange={onPassageChange}
-        onTranslate={onTranslate}
         onClear={onClear}
       />
 
