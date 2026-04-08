@@ -1,7 +1,7 @@
 import { Select } from 'antd'
 
 import { CollapsiblePanelItem } from './CollapsiblePanel'
-import targetLanguageNames from './targetLanguageNames.json'
+import targetLanguageNames from '../data/targetLanguageNames.json'
 import {
   targetLanguageOptions,
   type TargetLanguage,

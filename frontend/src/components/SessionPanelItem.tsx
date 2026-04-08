@@ -1,53 +1,50 @@
-import { format, formatDistanceToNowStrict, isToday, isValid } from "date-fns";
-import targetLanguageNames from "./targetLanguageNames.json";
+import { format, formatDistanceToNowStrict, isToday, isValid } from 'date-fns'
+import targetLanguageNames from '../data/targetLanguageNames.json'
 
-import { CollapsiblePanelItem } from "./CollapsiblePanel";
-import type { SessionHistoryRecord } from "../types";
+import { CollapsiblePanelItem } from './CollapsiblePanel'
+import sessionHistoryData from '../data/sessionHistoryData'
 
 type SessionPanelItemProps = {
-  onSessionSelect: (sessionID: string) => void;
-};
+  onSessionSelect: (sessionID: string) => void
+}
 
 function truncateText(value: string, maxLength: number) {
-  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value
 }
 
 function toValidDate(value: Date | string) {
-  const normalizedDate = value instanceof Date ? value : new Date(value);
+  const normalizedDate = value instanceof Date ? value : new Date(value)
 
-  return isValid(normalizedDate) ? normalizedDate : null;
+  return isValid(normalizedDate) ? normalizedDate : null
 }
 
 function formatSessionUpdatedAt(updatedAt: Date | string) {
-  const normalizedDate = toValidDate(updatedAt);
+  const normalizedDate = toValidDate(updatedAt)
 
   if (!normalizedDate) {
-    return "Unknown update time";
+    return 'Unknown update time'
   }
 
-  const minutesSinceUpdate = Math.floor(
-    (Date.now() - normalizedDate.getTime()) / 60000,
-  );
+  const minutesSinceUpdate = Math.floor((Date.now() - normalizedDate.getTime()) / 60000)
 
-  if (
-    isToday(normalizedDate) &&
-    minutesSinceUpdate >= 0 &&
-    minutesSinceUpdate < 60
-  ) {
-    return formatDistanceToNowStrict(normalizedDate, { addSuffix: true });
+  if (isToday(normalizedDate) && minutesSinceUpdate >= 0 && minutesSinceUpdate < 60) {
+    return formatDistanceToNowStrict(normalizedDate, { addSuffix: true })
   }
 
   if (isToday(normalizedDate)) {
-    return format(normalizedDate, "p");
+    return format(normalizedDate, 'p')
   }
 
-  return format(normalizedDate, "MMM d, yyyy p");
+  return format(normalizedDate, 'MMM d, yyyy p')
 }
 
 export default function SessionPanelItem(props: SessionPanelItemProps) {
-  const { onSessionSelect } = props;
-  // TODO: Replace with real API data fetching
-  const sessions: SessionHistoryRecord[] = [];
+  const { onSessionSelect } = props
+  const sessions = [...sessionHistoryData].sort(
+    (left, right) =>
+      (toValidDate(right.updatedAt)?.getTime() ?? 0) -
+      (toValidDate(left.updatedAt)?.getTime() ?? 0)
+  )
 
   return (
     <CollapsiblePanelItem
@@ -99,5 +96,5 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
         </div>
       )}
     </CollapsiblePanelItem>
-  );
+  )
 }
