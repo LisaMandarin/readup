@@ -50,7 +50,7 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
     <CollapsiblePanelItem
       title="Session History"
       description="Your previous work is tracked here. Click a session to continue working."
-      className="border-[rgba(24,57,57,0.18)]"
+      className="overflow-hidden border-[rgba(24,57,57,0.18)]"
     >
       {sessions.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[rgba(24,57,57,0.18)] bg-[rgba(24,57,57,0.04)] px-4 py-6 text-center">
@@ -62,7 +62,7 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
           {sessions.map((session) => (
             <button
               key={session.sessionID}
@@ -84,7 +84,7 @@ export default function SessionPanelItem(props: SessionPanelItemProps) {
                 </div>
 
                 <p className="m-0 text-sm leading-6 text-slate-600">
-                  {truncateText(session.passage, 100)}
+                  {truncateText(session.passage, 50)}
                 </p>
 
                 <p className="m-0 text-xs text-slate-500">

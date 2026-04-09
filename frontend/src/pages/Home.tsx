@@ -122,7 +122,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="flex flex-1 flex-col gap-6 lg:flex-row">
+          <div className="flex min-h-0 flex-1 flex-col gap-6 lg:h-[calc(100vh-8rem)] lg:flex-none lg:flex-row">
             <Sidebar
               activeMenu={activeMenu}
               onMenuSelect={handleMenuSelect}
