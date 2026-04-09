@@ -14,5 +14,9 @@
   "german": {
     "englishName": "German",
     "targetLanguageName": "Deutsch"
+  },
+  "portuguese": {
+    "englishName": "Portuguese",
+    "targetLanguageName": "Português"
   }
 }
