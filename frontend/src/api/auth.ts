@@ -31,6 +31,48 @@ export interface UserProfile {
   email: string;
 }
 
+
+export interface SentenceTranslationResponse {
+  uid: number
+  sentence: string
+  translation: string
+  lemma: string | string[]   // ← was string[]
+  pos: string | string[]   // ← was string[]
+}
+
+export interface TranslateApiResponse {
+  sessionID: string
+  translations: SentenceTranslationResponse[]
+}
+
+export interface TranslateRequestBody {
+  passage: string
+  targetLanguage: string
+}
+
+export const translateRequest = (body: TranslateRequestBody) =>
+  API.post<TranslateApiResponse>('/api/translate', body)
+
+export interface SessionSummary {
+  sessionID: string
+  title: string
+  passage_preview: string
+  target_language: string
+  created_at: string
+}
+
+export interface SessionDetailResponse {
+  sessionID: string
+  targetLanguage: string
+  translations: SentenceTranslationResponse[]
+}
+
+export const getSessionsRequest = () =>
+  API.get<SessionSummary[]>('/api/sessions')
+
+export const getSessionDetailRequest = (sessionID: string) =>
+  API.get<SessionDetailResponse>(`/api/sessions/${sessionID}`)
+
 // ── API Calls ─────────────────────────────────────────────
 
 // Step 1: Sign up → sends verification code to email

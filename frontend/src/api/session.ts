@@ -12,8 +12,8 @@ export interface TranslationItem {
   uid: number;
   sentence: string;
   translation: string;
-  lemma: string[];
-  pos: string[];
+  lemma: string;
+  pos: string;
 }
 
 export interface SessionDetail {

@@ -1,87 +1,63 @@
-import { useState, useRef } from 'react'
-import { Input, Button } from 'antd'
-import { ClearOutlined } from '@ant-design/icons'
-import TranslateButton from '../components/TranslateButton'
-import type { TextAreaRef } from 'antd/es/input/TextArea'
+// Passage.tsx
 
-const { TextArea } = Input
+import { Button, Card, Input, Space } from 'antd'
+import type { TargetLanguage } from '../components/targetLanguages'
 
-interface PassageProps {
+type Props = {
   passage: string
+  targetLanguage: TargetLanguage | ''
   onPassageChange: (value: string) => void
+  onTranslate: () => void
   onClear: () => void
-  translating?: boolean
+  isTranslating: boolean        // ← add
 }
 
-export default function Passage({
-  passage,
-  onPassageChange,
-  onClear,
-  translating = false,
-}: PassageProps) {
-  const [selectedText, setSelectedText] = useState('')
-  const textAreaRef = useRef<TextAreaRef>(null)
+export default function Passage(props: Props) {
+  const {
+    passage,
+    targetLanguage,
+    onPassageChange,
+    onTranslate,
+    onClear,
+    isTranslating,              // ← add
+  } = props
 
-  const handleSelect = () => {
-    const textarea = textAreaRef.current?.resizableTextArea?.textArea
-    if (textarea) {
-      const start = textarea.selectionStart
-      const end = textarea.selectionEnd
-
-      if (start !== end) {
-        setSelectedText(passage.substring(start, end))
-      } else {
-        setSelectedText('')
-      }
-    }
-  }
+  const hasPassage           = passage.trim().length > 0
+  const isTranslateDisabled  = !hasPassage || targetLanguage.length === 0 || isTranslating
+  const needsTargetLanguage  = hasPassage && targetLanguage.length === 0
 
   return (
-    <div className="mt-6">
-      <TextArea
-        ref={textAreaRef}
+    <Card className="mt-4" style={{ background: 'var(--card-bg)' }}>
+      <Input.TextArea
+        rows={5}
         value={passage}
-        onChange={(e) => {
-          onPassageChange(e.target.value)
-          setSelectedText('')
-        }}
-        onSelect={handleSelect}
-        placeholder="Paste or type your English passage here..."
-        rows={8}
-        style={{ fontSize: 16 }}
-        showCount
-        maxLength={5000}
+        onChange={(event) => onPassageChange(event.target.value)}
+        placeholder="Enter the passage you want to translate"
+        disabled={isTranslating}   // ← prevent edits mid-request
       />
 
-      {selectedText && (
-        <p className="mt-2 text-sm text-blue-600">
-          Selected: "
-          {selectedText.length > 60
-            ? `${selectedText.substring(0, 60)}...`
-            : selectedText}
-          "
-        </p>
-      )}
-
-      <div className="mt-4 flex items-center gap-3 flex-wrap">
-        <TranslateButton
-          passage={passage}
-          selectedText={selectedText}
-        />
-
+      <Space className="mt-4">
         <Button
-          icon={<ClearOutlined />}
-          onClick={() => {
-            onClear()
-            setSelectedText('')
-          }}
-          disabled={!passage}
-          size="large"
-          loading={translating}
+          type="primary"
+          onClick={onTranslate}
+          disabled={isTranslateDisabled}
+          loading={isTranslating}       // ← antd loading spinner on the button
+        >
+          {isTranslating ? 'Translating…' : 'Translate'}
+        </Button>
+        <Button
+          onClick={onClear}
+          disabled={isTranslating}      // ← prevent clear mid-request
         >
           Clear
         </Button>
-      </div>
-    </div>
+      </Space>
+
+      {needsTargetLanguage && !isTranslating && (
+        <p className="mt-3 mb-0 text-sm text-amber-700">
+          Select a target language in Settings to enable translation.
+        </p>
+      )}
+    </Card>
   )
 }

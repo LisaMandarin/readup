@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Tooltip } from 'antd'
 import {
   FolderOutlined,
@@ -19,7 +18,7 @@ import type { MenuKey } from './homeTypes'
 
 type SidebarProps = {
   activeMenu: MenuKey | null
-  onMenuSelect: (key: MenuKey | null) => void
+  onMenuSelect: (key: MenuKey) => void
   username?: string
   email?: string
   passage: string
@@ -42,19 +41,15 @@ export default function Sidebar(props: SidebarProps) {
     onSignOutStateChange,
     onSignOutError,
   } = props
-
   const { logout } = useAuth()
-  const navigate = useNavigate()
   const [isSigningOut, setIsSigningOut] = useState(false)
-
-  const handleConfirmSignOut = async () => {
+  const handleConfirmSignOut = () => {
     setIsSigningOut(true)
     onSignOutError(null)
     onSignOutStateChange(true)
 
     try {
       logout()
-      navigate('/signin', { replace: true })
     } catch (error) {
       setIsSigningOut(false)
       onSignOutStateChange(false)
@@ -64,14 +59,6 @@ export default function Sidebar(props: SidebarProps) {
           : 'We could not sign you out. Please try again.'
       )
     }
-  }
-
-  const handleCancelSignOut = () => {
-    onMenuSelect(null)
-  }
-
-  const handleMenuClick = (key: MenuKey) => {
-    onMenuSelect(activeMenu === key ? null : key)
   }
 
   const menuItems: Array<{
@@ -88,8 +75,11 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <aside className="w-full self-stretch lg:w-auto lg:flex-shrink-0">
       <div className="flex h-full w-full items-stretch">
-        <div className="flex h-full w-full items-stretch gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3">
-          <nav aria-label="Sidebar menu" className="flex flex-col gap-3">
+        <div className="flex h-full w-full flex-col gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3 lg:flex-row lg:items-stretch">
+          <nav
+            aria-label="Sidebar menu"
+            className="flex flex-row gap-3 overflow-x-auto py-1 lg:flex-col lg:overflow-visible lg:pb-0"
+          >
             {menuItems.map((item) => {
               const isActive = activeMenu === item.key
 
@@ -97,7 +87,7 @@ export default function Sidebar(props: SidebarProps) {
                 <Tooltip key={item.key} title={item.label} placement="right">
                   <button
                     type="button"
-                    onClick={() => handleMenuClick(item.key)}
+                    onClick={() => onMenuSelect(item.key)}
                     aria-label={item.label}
                     aria-pressed={isActive}
                     className={[
@@ -138,7 +128,7 @@ export default function Sidebar(props: SidebarProps) {
                 <SignOutPanelItem
                   isSigningOut={isSigningOut}
                   onConfirm={handleConfirmSignOut}
-                  onCancel={handleCancelSignOut}
+                  onCancel={() => onMenuSelect('signout')}
                 />
               )}
             </div>

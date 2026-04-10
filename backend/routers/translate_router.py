@@ -9,8 +9,7 @@ from database import get_db
 from models import User, TranslationSession, SentenceTranslation
 from schemas import (
     TranslateRequest,
-    TranslateFullResponse,
-    SessionResponse,
+    TranslateOnlyResponse,  # Changed
     SentenceTranslationResponse,
     SUPPORTED_LANGUAGES,
 )
@@ -99,7 +98,7 @@ def get_languages(current_user: User = Depends(get_current_user)):
     ]
 
 
-@router.post("", response_model=TranslateFullResponse, status_code=201)
+@router.post("", response_model=TranslateOnlyResponse, status_code=201)  # Changed
 def translate_passage(
     body: TranslateRequest,
     current_user: User = Depends(get_current_user),
@@ -136,14 +135,14 @@ def translate_passage(
 
     for idx, sentence in enumerate(sentences, start=1):
         translated_text = translate_sentence(sentence, body.targetLanguage)
-        lemma, pos = extract_lemma_and_pos(sentence)
+        lemma_list, pos_list = extract_lemma_and_pos(sentence)
 
         record = SentenceTranslation(
             uid=idx,
             sentence=sentence,
             translation=translated_text,
-            lemma=lemma,
-            pos=pos,
+            lemma=lemma_list,
+            pos=pos_list,
             session_id=session_record.session_id,
         )
         db.add(record)
@@ -160,24 +159,18 @@ def translate_passage(
             detail=f"Failed to save translations: {str(e)}",
         )
 
-    return TranslateFullResponse(
-        session=SessionResponse(
-            sessionID=session_record.session_id,
-            userID=f"user-{current_user.id}",
-            title=session_record.title,
-            passagePreview=session_record.passage_preview,
-            fullPassage=session_record.full_passage,
-            targetLanguage=session_record.target_language,
-            createdAt=session_record.created_at,
-            updatedAt=session_record.updated_at,
-        ),
+    # Changed: Return only translations
+    return TranslateOnlyResponse(
+        sessionID=session_record.session_id,
         translations=[
             SentenceTranslationResponse(
                 uid=rec.uid,
                 sentence=rec.sentence,
                 translation=rec.translation,
-                lemma=rec.lemma,
-                pos=rec.pos,
+                lemma=", ".join(rec.lemma) if
+            isinstance(rec.lemma, list) else rec.lemma,    
+                pos=", ".join(rec.pos) if
+            isinstance(rec.pos, list) else rec.pos,
             )
             for rec in translation_records
         ],

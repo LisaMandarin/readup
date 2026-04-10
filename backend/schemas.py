@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from typing import Optional
+from enum import Enum
 
 from pydantic import BaseModel, field_validator, model_validator
 
@@ -116,16 +117,15 @@ SUPPORTED_LANGUAGES = [
 class TranslateRequest(BaseModel):
     passage: str
     targetLanguage: Optional[str] = None
-    target_language: Optional[str] = None
 
     @model_validator(mode="after")
     def normalize_target_language(self):
-        value = self.targetLanguage or self.target_language
+        value = self.targetLanguage
 
         if not value:
             raise ValueError(
                 "Target language is required. "
-                "Send 'targetLanguage' or 'target_language'."
+                "Send 'targetLanguage'."
             )
 
         value = value.strip().lower()
@@ -137,7 +137,6 @@ class TranslateRequest(BaseModel):
             )
 
         self.targetLanguage = value
-        self.target_language = value
         return self
 
     @field_validator("passage")
@@ -155,8 +154,8 @@ class SentenceTranslationResponse(BaseModel):
     uid: int
     sentence: str
     translation: str
-    lemma: list[str]
-    pos: list[str]
+    lemma: str
+    pos: str
 
     class Config:
         from_attributes = True
@@ -177,8 +176,20 @@ class SessionResponse(BaseModel):
 
 
 class TranslateFullResponse(BaseModel):
+    """Combined response with both session and translations (deprecated for new endpoints)"""
     session: SessionResponse
     translations: list[SentenceTranslationResponse]
+
+
+class TranslateOnlyResponse(BaseModel):
+    """Response for translation endpoint - only translations, no session details"""
+    sessionID: str
+    translations: list[SentenceTranslationResponse]
+
+
+class SessionOnlyResponse(BaseModel):
+    """Response for session detail endpoint - only session metadata, no translations"""
+    session: SessionResponse
 
 
 class SessionListItem(BaseModel):
@@ -190,3 +201,21 @@ class SessionListItem(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class LookupType(str, Enum):
+    english_definition = "english_definition"
+    spanish_translation = "spanish_translation"
+    example_sentence = "example_sentence"
+    cefr_level = "cefr_level"
+
+class WordLookupRequest(BaseModel):
+    word: str
+    context: str | None = None   
+    lookup_type: LookupType
+    target_language: str = "spanish"  
+
+class WordLookupResponse(BaseModel):
+    word: str
+    lookup_type: LookupType
+    result: str        

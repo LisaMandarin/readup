@@ -5,6 +5,7 @@ from database import Base, engine
 from routers.auth_router import router as auth_router
 from routers.translate_router import router as translation_router
 from routers.session_router import router as session_router
+from routers.lookup_router import router as lookup_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,6 +27,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(translation_router)
 app.include_router(session_router)
+app.include_router(lookup_router)
+
 
 
 @app.get("/health")

@@ -6,9 +6,8 @@ from database import get_db
 from models import User, TranslationSession
 from schemas import (
     SessionListItem,
-    TranslateFullResponse,
+    SessionOnlyResponse,  # Changed
     SessionResponse,
-    SentenceTranslationResponse,
 )
 
 router = APIRouter(prefix="/api/sessions", tags=["Sessions"])
@@ -38,7 +37,7 @@ def get_sessions(
     ]
 
 
-@router.get("/{session_id}", response_model=TranslateFullResponse)
+@router.get("/{session_id}", response_model=SessionOnlyResponse)  # Changed
 def get_session(
     session_id: str,
     current_user: User = Depends(get_current_user),
@@ -59,7 +58,8 @@ def get_session(
             detail="Session not found",
         )
 
-    return TranslateFullResponse(
+    # Changed: Return only session details
+    return SessionOnlyResponse(
         session=SessionResponse(
             sessionID=session_record.session_id,
             userID=f"user-{current_user.id}",
@@ -70,16 +70,6 @@ def get_session(
             createdAt=session_record.created_at,
             updatedAt=session_record.updated_at,
         ),
-        translations=[
-            SentenceTranslationResponse(
-                uid=t.uid,
-                sentence=t.sentence,
-                translation=t.translation,
-                lemma=t.lemma,
-                pos=t.pos,
-            )
-            for t in session_record.translations
-        ],
     )
 
 

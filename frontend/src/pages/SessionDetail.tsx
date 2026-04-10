@@ -137,11 +137,11 @@ export default function SessionDetail() {
               </Paragraph>
 
               <Text type="secondary" style={{ fontSize: 12 }}>
-                Lemma: {item.lemma.join(', ')}
+                Lemma: {item.lemma}
               </Text>
               <br />
               <Text type="secondary" style={{ fontSize: 12 }}>
-                POS: {item.pos.join(', ')}
+                POS: {item.pos}
               </Text>
 
               <Divider />
