@@ -21,6 +21,11 @@ Required environment variables:
 - `DATABASE_URL`: PostgreSQL connection string
 - `SECRET_KEY`: JWT signing secret
 - `CORS_ORIGINS`: comma-separated frontend origins
+- `GEMINI_API_KEY`: Google Gemini API key for summary evaluation
+
+Optional environment variables:
+
+- `GEMINI_MODEL`: Gemini model name, defaults to `gemini-2.5-flash`
 
 Example:
 
@@ -28,6 +33,8 @@ Example:
 DATABASE_URL=postgresql://username:password@host:5432/database_name
 SECRET_KEY=replace-with-a-long-random-secret
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+GEMINI_API_KEY=replace-with-your-google-gemini-api-key
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ## Run the development server
@@ -40,6 +47,34 @@ The API will be available at `http://127.0.0.1:8000`.
 
 - Docs (Swagger UI): `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
+
+## Comprehension evaluation API
+
+Authenticated users can evaluate a summary with:
+
+```http
+POST /api/comprehension/evaluate
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Example request body:
+
+```json
+{
+  "passage": "Original passage text...",
+  "summary": "Student summary text..."
+}
+```
+
+Example response:
+
+```json
+{
+  "score": 4,
+  "advice": "Your summary captures the main point clearly..."
+}
+```
 
 ## Deploy on Render
 

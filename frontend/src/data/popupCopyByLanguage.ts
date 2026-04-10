@@ -42,6 +42,14 @@ const popupCopyByLanguage: Record<TargetLanguage, PopupCopy> = {
     lookUp: 'Nachschlagen',
     cancel: 'Abbrechen',
   },
+  portuguese: {
+    englishDefinition: 'Definição em inglês',
+    targetLanguageTranslation: 'Português',
+    exampleSentence: 'Frase de exemplo',
+    cefrLevel: 'Nível CEFR',
+    lookUp: 'Consultar',
+    cancel: 'Cancelar',
+  },
 }
 
 export default popupCopyByLanguage

@@ -59,3 +59,36 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ComprehensionRequest(BaseModel):
+    passage: str
+    summary: str
+
+    @field_validator("passage", "summary")
+    @classmethod
+    def non_empty_text(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("This field cannot be empty")
+        return v
+
+
+class ComprehensionResponse(BaseModel):
+    score: int
+    advice: str
+
+    @field_validator("score")
+    @classmethod
+    def score_in_range(cls, v: int) -> int:
+        if v < 1 or v > 5:
+            raise ValueError("Score must be between 1 and 5")
+        return v
+
+    @field_validator("advice")
+    @classmethod
+    def advice_non_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Advice cannot be empty")
+        return v

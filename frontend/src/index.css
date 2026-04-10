@@ -48,5 +48,39 @@ h1, h2, h3 {
     font-family: var(--font-heading);
   }
 
+.comprehension-button.ant-btn-primary {
+  background: #0f5f5c;
+  border-color: #0f5f5c;
+}
 
+.comprehension-button.ant-btn-primary:hover,
+.comprehension-button.ant-btn-primary:focus {
+  background: #16706d !important;
+  border-color: #16706d !important;
+}
 
+.comprehension-button.ant-btn-primary:active {
+  background: #0b4b48 !important;
+  border-color: #0b4b48 !important;
+}
+
+.comprehension-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(15, 95, 92, 0.2);
+  border-radius: 9999px;
+  background: rgba(15, 95, 92, 0.08);
+  color: #0f5f5c;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.comprehension-toggle-button:hover,
+.comprehension-toggle-button:focus {
+  background: rgba(15, 95, 92, 0.14);
+  border-color: rgba(15, 95, 92, 0.35);
+  color: #0b4b48;
+}
