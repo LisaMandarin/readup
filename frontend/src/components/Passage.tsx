@@ -79,7 +79,7 @@ export default function Passage(props: Props) {
       )}
 
       {hasPassage && isComprehensionOpen && (
-        <Comprehension onClose={resetComprehension} />
+        <Comprehension passage={passage} onClose={resetComprehension} />
       )}
     </Card>
   );

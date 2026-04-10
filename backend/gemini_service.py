@@ -53,7 +53,7 @@ Score the summary from 1 to 5:
 - 2 = major misunderstandings or weak coverage
 - 1 = largely incorrect, irrelevant, or very incomplete
 
-Write advice in English only, around 200 words.
+Write advice in simple English only, around 100 words.
 The advice should:
 - explain what the student understood well
 - point out missing or incorrect ideas
