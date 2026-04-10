@@ -1,8 +1,8 @@
 import type { TargetLanguage } from '../components/targetLanguages'
+import Passage from '../components/Passage'
 import LookupInstructions from '../components/LookupInstructions'
 import type { TranslationRecord } from '../data/translationData'
 import Translation from '../components/Translation'
-import Passage from './Passage'
 
 type MainContentColumnProps = {
   passage: string

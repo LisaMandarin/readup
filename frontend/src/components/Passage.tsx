@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Card, Input, Space } from "antd";
-import Comprehension from "../components/Comprehension";
-import type { TargetLanguage } from "../components/targetLanguages";
+import Comprehension from "./Comprehension";
+import type { TargetLanguage } from "./targetLanguages";
 
 type Props = {
   passage: string;
