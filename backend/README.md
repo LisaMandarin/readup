@@ -53,7 +53,7 @@ The API will be available at `http://127.0.0.1:8000`.
 Authenticated users can evaluate a summary with:
 
 ```http
-POST /api/comprehension/evaluate
+POST /api/comprehension/
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
@@ -82,12 +82,15 @@ Create a **Web Service** pointing at the `backend` directory.
 
 - Build command: `pip install -r requirements.txt`
 - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- This backend does not use `spacy`; if the Render dashboard still runs a `python -m spacy ...` command from an older setup, remove it.
 
 Do not create a `.env` file on Render. Set these environment variables in the Render dashboard:
 
 - `DATABASE_URL`
 - `SECRET_KEY`
 - `CORS_ORIGINS`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL` (optional)
 
 Example production `CORS_ORIGINS` value:
 
