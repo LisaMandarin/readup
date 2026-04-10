@@ -105,7 +105,7 @@ export default function Home() {
       <div className="relative min-h-screen">
         <div
           className={[
-            'flex min-h-screen flex-col px-6 py-6 transition-opacity duration-200',
+            'flex min-h-screen flex-col justify-between px-6 py-6 transition-opacity duration-200',
             isSigningOut ? 'opacity-50' : 'opacity-100',
           ].join(' ')}
         >
