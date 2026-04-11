@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
-from typing import List
+from typing import List, Dict, Any
 from auth import get_current_user
 from database import get_db
 from models import User, Session as SessionModel, Passage
@@ -13,6 +13,7 @@ from schemas import (
     PassageResponse,
     SessionWithPassagesResponse
 )
+from translation_service import TranslationService, TranslationSaveError
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -192,18 +193,21 @@ async def create_passage_in_session(
             detail="Session not found"
         )
     
-    # Create new passage
-    new_passage = Passage(
-        session_id=session_id,
-        sentence=request.sentence,
-        translation=request.translation
-    )
-    
-    db.add(new_passage)
-    db.commit()
-    db.refresh(new_passage)
-    
-    return new_passage
+    # Create new passage using TranslationService
+    try:
+        new_passage = TranslationService.save_translation(
+            db=db,
+            session_id=session_id,
+            sentence=request.sentence,
+            translation=request.translation,
+            user_id=current_user.id
+        )
+        return new_passage
+    except TranslationSaveError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
 @router.put("/{session_id}/passages/{passage_id}", response_model=PassageResponse)
@@ -247,16 +251,22 @@ async def update_passage(
             detail="Passage not found"
         )
     
-    # Update fields if provided
-    if request.sentence is not None:
-        passage.sentence = request.sentence
-    if request.translation is not None:
-        passage.translation = request.translation
-    
-    db.commit()
-    db.refresh(passage)
-    
-    return passage
+    # Update passage using TranslationService
+    try:
+        updated_passage = TranslationService.update_translation(
+            db=db,
+            passage_id=passage_id,
+            session_id=session_id,
+            sentence=request.sentence,
+            translation=request.translation,
+            user_id=current_user.id
+        )
+        return updated_passage
+    except TranslationSaveError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
 @router.delete("/{session_id}/passages/{passage_id}")
@@ -304,10 +314,59 @@ async def delete_passage(
     
     return {"message": "Passage deleted successfully"}
 
-router = APIRouter(prefix="/sessions", tags=["sessions"])
+
+# ── Enhanced Translation Endpoints (Tigbo Integration) ────────────────────
+
+@router.post("/{session_id}/batch-passages", response_model=List[PassageResponse])
+async def batch_create_passages(
+    session_id: int,
+    passages_data: List[Dict[str, str]],
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Batch create multiple passages with translations
+    Supports Tigbo workflow for bulk translation saving
+    """
+    try:
+        saved_passages = TranslationService.batch_save_translations(
+            db=db,
+            session_id=session_id,
+            passages_data=passages_data,
+            user_id=current_user.id
+        )
+        return saved_passages
+    except TranslationSaveError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
-def generate_session_title(sentence: str) -> str:
+@router.get("/{session_id}/translation-stats", response_model=Dict[str, Any])
+async def get_translation_statistics(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get translation statistics for a session - useful for Tigbo monitoring"""
+    # Verify session belongs to user
+    session = (
+        db.query(SessionModel)
+        .filter(
+            SessionModel.id == session_id,
+            SessionModel.user_id == current_user.id
+        )
+        .first()
+    )
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found"
+        )
+    
+    return TranslationService.get_translation_statistics(db, session_id)
     """Generate a title for session based on the sentence"""
     # Take first 5 words and clean them up
     words = sentence.strip().split()[:5]
