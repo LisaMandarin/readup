@@ -1,4 +1,6 @@
 import re
+from datetime import datetime
+from typing import List, Optional
 from pydantic import BaseModel, field_validator
 
 
@@ -92,3 +94,107 @@ class ComprehensionResponse(BaseModel):
         if not v:
             raise ValueError("Advice cannot be empty")
         return v
+
+
+# ── Session Schemas ──────────────────────────────────────
+
+class SessionCreateRequest(BaseModel):
+    sentence: str
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_non_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Sentence cannot be empty")
+        return v
+
+
+class SessionUpdateRequest(BaseModel):
+    title: Optional[str] = None
+
+    @field_validator("title")
+    @classmethod
+    def title_valid(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) < 1 or len(v) > 100:
+                raise ValueError("Title must be 1-100 characters")
+        return v
+
+
+class SessionResponse(BaseModel):
+    id: int
+    title: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ── Passage Schemas ─────────────────────────────────────
+
+class PassageCreateRequest(BaseModel):
+    sentence: str
+    translation: Optional[str] = None
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_non_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Sentence cannot be empty")
+        return v
+
+    @field_validator("translation")
+    @classmethod
+    def translation_optional(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if not v:
+                return None
+        return v
+
+
+class PassageUpdateRequest(BaseModel):
+    sentence: Optional[str] = None
+    translation: Optional[str] = None
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_optional(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if not v:
+                raise ValueError("Sentence cannot be empty")
+        return v
+
+    @field_validator("translation")
+    @classmethod
+    def translation_optional(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if not v:
+                return None
+        return v
+
+
+class PassageResponse(BaseModel):
+    id: int
+    sentence: str
+    translation: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SessionWithPassagesResponse(BaseModel):
+    id: int
+    title: str
+    created_at: datetime
+    updated_at: datetime
+    passages: List[PassageResponse]
+
+    class Config:
+        from_attributes = True
