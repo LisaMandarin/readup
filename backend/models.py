@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from database import Base
 
@@ -15,5 +16,47 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc),
     )
 
+    # Relationship to sessions
+    sessions = relationship("Session", back_populates="user")
+
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', email='{self.email}')>"
+
+
+class Session(Base):
+    __tablename__ = "sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(100), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    # Relationships
+    user = relationship("User", back_populates="sessions")
+    passages = relationship("Passage", back_populates="session")
+
+    def __repr__(self):
+        return f"<Session(id={self.id}, title='{self.title}', user_id={self.user_id})>"
+
+
+class Passage(Base):
+    __tablename__ = "passages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
+    sentence = Column(Text, nullable=False)
+    translation = Column(Text, nullable=True)
+
+    # Relationship
+    session = relationship("Session", back_populates="passages")
+
+    def __repr__(self):
+        return f"<Passage(id={self.id}, session_id={self.session_id})>"
