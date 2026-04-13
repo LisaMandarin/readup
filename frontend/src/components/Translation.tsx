@@ -1,12 +1,11 @@
-// Translation.tsx
-
 import { Card } from 'antd'
 
 import LookupPopup from './LookupPopup'
 import TranslationCard from './TranslationCard'
-import { getLookupMetadata } from './translationLookup'
+import {
+  getLookupMetadata,
+} from './translationLookup'
 import useTranslationLookup from './useTranslationLookup'
-import { useAuth } from '../context/AuthContext'          // ← add
 import targetLanguageNames from '../data/targetLanguageNames.json'
 import popupCopyByLanguage from '../data/popupCopyByLanguage'
 import type { TranslationRecord } from '../data/translationData'
@@ -17,14 +16,16 @@ type Props = {
 
 export default function Translation(props: Props) {
   const { translations } = props
-
   const firstTranslation = translations[0]
-  if (!firstTranslation) return null
+
+  if (!firstTranslation) {
+    return null
+  }
 
   const targetLanguage = firstTranslation.targetLanguage
-  const languageLabel  = targetLanguageNames[targetLanguage].targetLanguageName
-  const popupCopy      = popupCopyByLanguage[targetLanguage]
-
+  const languageLabel =
+    targetLanguageNames[targetLanguage].targetLanguageName
+  const popupCopy = popupCopyByLanguage[targetLanguage]
   const {
     popup,
     popupRef,
@@ -39,9 +40,7 @@ export default function Translation(props: Props) {
   } = useTranslationLookup({
     translations,
     popupCopy,
-    targetLanguage,
   })
-
   const popupMetadata = popup
     ? getLookupMetadata(translations, popup.uid, popup.selectedText)
     : null
@@ -63,7 +62,6 @@ export default function Translation(props: Props) {
           />
         ))}
       </div>
-
       {popup && (
         <LookupPopup
           popup={popup}

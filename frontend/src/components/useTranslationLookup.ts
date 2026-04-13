@@ -1,51 +1,51 @@
-// useTranslationLookup.ts
-
 import { useEffect, useRef, useState } from 'react'
 
-import { fetchWordLookup }        from '../api/lookup'
-import type { PopupCopy }         from '../data/popupCopyByLanguage'
+import type { PopupCopy } from '../data/popupCopyByLanguage'
 import type { TranslationRecord } from '../data/translationData'
-import type { TargetLanguage }    from '../components/targetLanguages'
 import {
   defaultLookupOptions,
   getLookupResultId,
-  getEnabledOptionKeys,
+  getEnabledOptions,
   getLookupMetadata,
   hasEnabledLookupOptions,
-  LOOKUP_TYPE_MAP,
   type LookupOptionKey,
   type LookupOptionsState,
   type LookupResult,
-  type ResolvedOption,
   type PopupState,
 } from './translationLookup'
 
 type Params = {
-  translations:   TranslationRecord[]
-  popupCopy:      PopupCopy
-  targetLanguage: TargetLanguage   // e.g. "spanish"
+  translations: TranslationRecord[]
+  popupCopy: PopupCopy
 }
 
 export default function useTranslationLookup(params: Params) {
-  const { translations, popupCopy, targetLanguage } = params
-
-  const [popup, setPopup]               = useState<PopupState | null>(null)
-  const [lookupOptions, setLookupOptions] = useState<LookupOptionsState>(defaultLookupOptions)
+  const { translations, popupCopy } = params
+  const [popup, setPopup] = useState<PopupState | null>(null)
+  const [lookupOptions, setLookupOptions] =
+    useState<LookupOptionsState>(defaultLookupOptions)
   const [lookupResults, setLookupResults] = useState<LookupResult[]>([])
   const popupRef = useRef<HTMLDivElement | null>(null)
 
-  // ── Close popup on outside click / scroll / resize ──────────────────────
   useEffect(() => {
-    if (!popup) return
+    if (!popup) {
+      return
+    }
 
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target
-      if (target instanceof Node && popupRef.current?.contains(target)) return
+
+      if (target instanceof Node && popupRef.current?.contains(target)) {
+        return
+      }
+
       window.getSelection()?.removeAllRanges()
       setPopup(null)
     }
 
-    const handleViewportChange = () => setPopup(null)
+    const handleViewportChange = () => {
+      setPopup(null)
+    }
 
     document.addEventListener('mousedown', handlePointerDown)
     window.addEventListener('resize', handleViewportChange)
@@ -71,104 +71,43 @@ export default function useTranslationLookup(params: Params) {
   }
 
   const handleLookupResultDelete = (id: string) => {
-    setLookupResults((current) =>
-      current.filter((result) => result.id !== id)
-    )
+    setLookupResults((current) => current.filter((result) => result.id !== id))
   }
 
-  // ── Core: build a skeleton result immediately, then fill results async ──
-  const handleLookUp = async () => {
-    if (!popup || !hasEnabledLookupOptions(lookupOptions)) return
+  const handleLookUp = () => {
+    if (!popup || !hasEnabledLookupOptions(lookupOptions)) {
+      return
+    }
 
     const { partOfSpeech, lemma } = getLookupMetadata(
       translations,
       popup.uid,
       popup.selectedText
     )
-
-    const resultId      = getLookupResultId(popup.uid, popup.selectedText)
-    const enabledKeys   = getEnabledOptionKeys(lookupOptions)
-
-    // Find the sentence text for context
-    const sentenceRecord = translations.find((t) => t.uid === popup.uid)
-    const context        = sentenceRecord?.sentence ?? undefined
-
-    // Build skeleton options — result: null means "loading"
-    const skeletonOptions: ResolvedOption[] = enabledKeys.map((key) => ({
-      key,
-      label:  popupCopy[key],
-      result: null,
-      error:  null,
-    }))
-
-    const skeletonResult: LookupResult = {
-      uid:          popup.uid,
-      id:           resultId,
+    const resultId = getLookupResultId(popup.uid, popup.selectedText)
+    const nextResult = {
+      uid: popup.uid,
+      id: resultId,
       selectedText: popup.selectedText,
       partOfSpeech,
       lemma,
-      options:      skeletonOptions,
+      enabledOptions: getEnabledOptions(lookupOptions, popupCopy),
     }
 
-    // Show the card immediately with loading state
     setLookupResults((current) => {
-      const existingIndex = current.findIndex((r) => r.id === resultId)
-      if (existingIndex === -1) return [...current, skeletonResult]
-      return current.map((r, i) => (i === existingIndex ? skeletonResult : r))
+      const existingIndex = current.findIndex((result) => result.id === resultId)
+
+      if (existingIndex === -1) {
+        return [...current, nextResult]
+      }
+
+      return current.map((result, index) =>
+        index === existingIndex ? nextResult : result
+      )
     })
 
     window.getSelection()?.removeAllRanges()
     setPopup(null)
-
-    // Fire all API calls in parallel
-    await Promise.all(
-      enabledKeys.map(async (key) => {
-        const lookupType = LOOKUP_TYPE_MAP[key]
-
-        try {
-          const response = await fetchWordLookup(
-            {
-              word:            popup.selectedText,
-              context,
-              lookup_type:     lookupType as Parameters<typeof fetchWordLookup>[0]['lookup_type'],
-              target_language: targetLanguage,
-            },
-          )
-
-          // Patch just this option in the result
-          setLookupResults((current) =>
-            current.map((r) => {
-              if (r.id !== resultId) return r
-              return {
-                ...r,
-                options: r.options.map((opt) =>
-                  opt.key === key
-                    ? { ...opt, result: response.result, error: null }
-                    : opt
-                ),
-              }
-            })
-          )
-        } catch (err) {
-          const message =
-            err instanceof Error ? err.message : 'Something went wrong'
-
-          setLookupResults((current) =>
-            current.map((r) => {
-              if (r.id !== resultId) return r
-              return {
-                ...r,
-                options: r.options.map((opt) =>
-                  opt.key === key
-                    ? { ...opt, result: null, error: message }
-                    : opt
-                ),
-              }
-            })
-          )
-        }
-      })
-    )
   }
 
   const handleSentenceSelection = (uid: number) => {
@@ -180,7 +119,7 @@ export default function useTranslationLookup(params: Params) {
         return
       }
 
-      const range           = selection.getRangeAt(0)
+      const range = selection.getRangeAt(0)
       const sentenceElement = document.querySelector<HTMLElement>(
         `[data-sentence-uid="${uid}"]`
       )
@@ -197,19 +136,15 @@ export default function useTranslationLookup(params: Params) {
           : commonAncestor
       )
 
-      if (
-        !selectionInsideSentence ||
-        selection.toString().trim().length === 0
-      ) {
+      if (!selectionInsideSentence || selection.toString().trim().length === 0) {
         setPopup(null)
         return
       }
 
-      const rect            = range.getBoundingClientRect()
-      const popupWidth      = 320
-      const popupHeight     = 520
+      const rect = range.getBoundingClientRect()
+      const popupWidth = 320
+      const popupHeight = 520
       const viewportPadding = 16
-
       const top = Math.min(
         rect.bottom + 12,
         window.innerHeight - popupHeight - viewportPadding
@@ -219,7 +154,12 @@ export default function useTranslationLookup(params: Params) {
         window.innerWidth - popupWidth - viewportPadding
       )
 
-      setPopup({ top, left, uid, selectedText: selection.toString().trim() })
+      setPopup({
+        top,
+        left,
+        uid,
+        selectedText: selection.toString().trim(),
+      })
       setLookupOptions(defaultLookupOptions)
     }, 0)
   }

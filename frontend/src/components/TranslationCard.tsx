@@ -57,7 +57,7 @@ export default function TranslationCard(props: Props) {
           </button>
           {isLookupResultsExpanded && (
             <div className="px-3 pb-3">
-              <LookupResults results={results} onDeleteResult={onDeleteResult} />
+              <LookupResults results={results} onDeleteResult={onDeleteResult} onSentenceSelection={onSentenceSelection} />
             </div>
           )}
         </div>
