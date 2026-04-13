@@ -30,9 +30,16 @@ export const germanInstructions_de = [
   'Klicken Sie auf „Look Up“ und warten Sie, bis die Ergebnisse angezeigt werden.',
 ]
 
+export const portugueseInstructions_pt = [
+  'Selecione a palavra ou frase no texto original.',
+  'Quando o menu pop-up aparecer, escolha o que você quer consultar.',
+  'Clique no botão "Look Up" e espere os resultados aparecerem.',
+]
+
 export const lookupInstructionsByLanguage: Record<TargetLanguage, string[]> = {
   chinese: chineseInstructions,
   spanish: spanishInstructions_es,
   french: frenchInstructions_fr,
   german: germanInstructions_de,
+  portuguese: portugueseInstructions_pt,
 }

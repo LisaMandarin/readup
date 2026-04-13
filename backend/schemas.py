@@ -1,12 +1,13 @@
+# schemas.py — complete rewrite
+
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
-
 from pydantic import BaseModel, field_validator, model_validator
 
 
-# ── Auth Schemas ───────────────────────────────────────────
+# ── Auth Schemas ───────────────────────────────────────────────────────────────
 
 class SignUpRequest(BaseModel):
     username: str
@@ -102,7 +103,7 @@ class MessageResponse(BaseModel):
     message: str
 
 
-# ── Translation / Session Schemas ──────────────────────────
+# ── Translation Schemas ────────────────────────────────────────────────────────
 
 SUPPORTED_LANGUAGES = [
     "spanish",
@@ -124,8 +125,7 @@ class TranslateRequest(BaseModel):
 
         if not value:
             raise ValueError(
-                "Target language is required. "
-                "Send 'targetLanguage'."
+                "Target language is required. Send 'targetLanguage'."
             )
 
         value = value.strip().lower()
@@ -150,72 +150,203 @@ class TranslateRequest(BaseModel):
         return v
 
 
-class SentenceTranslationResponse(BaseModel):
-    uid: int
-    sentence: str
-    translation: str
+class VocabItem(BaseModel):
+    """Single vocab word with its spaCy lemma and POS tag."""
+    word:  str
     lemma: str
-    pos: str
+    pos:   str
 
     class Config:
         from_attributes = True
 
 
-class SessionResponse(BaseModel):
-    sessionID: str
-    userID: str
-    title: str
-    passagePreview: str
-    fullPassage: str
+class SentenceTranslationResponse(BaseModel):
+    """
+    One translated sentence matching the exact response shape:
+    {
+        uid: 12,
+        sentence: "...",
+        translation: "...",
+        targetLanguage: "portuguese",
+        sessionID: "session-d91e",
+        vocabItems: [ { word, lemma, pos }, ... ]
+    }
+    """
+    uid:            int
+    sentence:       str
+    translation:    str
     targetLanguage: str
-    createdAt: datetime
-    updatedAt: datetime
+    sessionID:      str
+    vocabItems:     List[VocabItem]
 
     class Config:
         from_attributes = True
-
-
-class TranslateFullResponse(BaseModel):
-    """Combined response with both session and translations (deprecated for new endpoints)"""
-    session: SessionResponse
-    translations: list[SentenceTranslationResponse]
 
 
 class TranslateOnlyResponse(BaseModel):
-    """Response for translation endpoint - only translations, no session details"""
-    sessionID: str
-    translations: list[SentenceTranslationResponse]
-
-
-class SessionOnlyResponse(BaseModel):
-    """Response for session detail endpoint - only session metadata, no translations"""
-    session: SessionResponse
-
-
-class SessionListItem(BaseModel):
-    sessionID: str
-    title: str
-    passagePreview: str
-    targetLanguage: str
-    createdAt: datetime
+    """Top-level response wrapping all translated sentences."""
+    translations: List[SentenceTranslationResponse]
 
     class Config:
         from_attributes = True
 
 
+# ── Lookup Schemas ─────────────────────────────────────────────────────────────
+
 class LookupType(str, Enum):
-    english_definition = "english_definition"
+    english_definition  = "english_definition"
     spanish_translation = "spanish_translation"
-    example_sentence = "example_sentence"
-    cefr_level = "cefr_level"
+    example_sentence    = "example_sentence"
+    cefr_level          = "cefr_level"
+
 
 class WordLookupRequest(BaseModel):
-    word: str
-    context: str | None = None   
-    lookup_type: LookupType
-    target_language: str = "spanish"  
+    word:            str
+    context:         Optional[str] = None
+    lookup_type:     LookupType
+    target_language: str = "spanish"
+
 
 class WordLookupResponse(BaseModel):
-    word: str
+    word:        str
     lookup_type: LookupType
-    result: str        
+    result:      str
+
+
+# ── Comprehension Schemas ──────────────────────────────────────────────────────
+
+class ComprehensionRequest(BaseModel):
+    passage: str
+    summary: str
+
+    @field_validator("passage", "summary")
+    @classmethod
+    def non_empty_text(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("This field cannot be empty")
+        return v
+
+
+class ComprehensionResponse(BaseModel):
+    score:  int
+    advice: str
+
+    @field_validator("score")
+    @classmethod
+    def score_in_range(cls, v: int) -> int:
+        if v < 1 or v > 5:
+            raise ValueError("Score must be between 1 and 5")
+        return v
+
+    @field_validator("advice")
+    @classmethod
+    def advice_non_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Advice cannot be empty")
+        return v
+
+
+# ── Session Schemas ────────────────────────────────────────────────────────────
+
+class SessionCreateRequest(BaseModel):
+    sentence: str
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_non_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Sentence cannot be empty")
+        return v
+
+
+class SessionUpdateRequest(BaseModel):
+    title: Optional[str] = None
+
+    @field_validator("title")
+    @classmethod
+    def title_valid(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) < 1 or len(v) > 100:
+                raise ValueError("Title must be 1-100 characters")
+        return v
+
+
+class SessionResponse(BaseModel):
+    id:         int
+    title:      str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ── Passage Schemas ────────────────────────────────────────────────────────────
+
+class PassageCreateRequest(BaseModel):
+    sentence:    str
+    translation: Optional[str] = None
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_non_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Sentence cannot be empty")
+        return v
+
+    @field_validator("translation")
+    @classmethod
+    def translation_optional(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if not v:
+                return None
+        return v
+
+
+class PassageUpdateRequest(BaseModel):
+    sentence:    Optional[str] = None
+    translation: Optional[str] = None
+
+    @field_validator("sentence")
+    @classmethod
+    def sentence_optional(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if not v:
+                raise ValueError("Sentence cannot be empty")
+        return v
+
+    @field_validator("translation")
+    @classmethod
+    def translation_optional(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if not v:
+                return None
+        return v
+
+
+class PassageResponse(BaseModel):
+    id:          int
+    sentence:    str
+    translation: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SessionWithPassagesResponse(BaseModel):
+    id:         int
+    title:      str
+    created_at: datetime
+    updated_at: datetime
+    passages:   List[PassageResponse]
+
+    class Config:
+        from_attributes = True

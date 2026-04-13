@@ -73,9 +73,9 @@ export default function Sidebar(props: SidebarProps) {
   ]
 
   return (
-    <aside className="w-full self-stretch lg:w-auto lg:flex-shrink-0">
-      <div className="flex h-full w-full items-stretch">
-        <div className="flex h-full w-full flex-col gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3 lg:flex-row lg:items-stretch">
+    <aside className="min-h-0 w-full self-stretch lg:w-auto lg:flex-shrink-0">
+      <div className="flex h-full min-h-0 w-full items-stretch">
+        <div className="flex h-full min-h-0 w-full flex-col gap-3 rounded-lg border-4 border-[var(--card-border)] bg-[var(--card-bg)] p-3 lg:flex-row lg:items-stretch">
           <nav
             aria-label="Sidebar menu"
             className="flex flex-row gap-3 overflow-x-auto py-1 lg:flex-col lg:overflow-visible lg:pb-0"
@@ -108,7 +108,7 @@ export default function Sidebar(props: SidebarProps) {
             isOpen={activeMenu !== null}
             className="border-0 bg-transparent p-0 shadow-none"
           >
-            <div className={activeMenu === null ? 'hidden h-full' : 'block h-full'}>
+            <div className={activeMenu === null ? 'hidden h-full' : 'block h-full min-h-0 max-h-full'}>
               {activeMenu === 'profile' && (
                 <ProfilePanelItem username={username} email={email} />
               )}

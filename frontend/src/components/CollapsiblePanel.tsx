@@ -20,14 +20,14 @@ export default function CollapsiblePanel(props: CollapsiblePanelProps) {
     <div
       aria-hidden={!isOpen}
       className={[
-        'overflow-hidden rounded-lg bg-[var(--card-bg)] transition-all duration-300 ease-out',
+        'min-h-0 overflow-hidden rounded-lg bg-[var(--card-bg)] transition-all duration-300 ease-out',
         isOpen
-          ? 'max-h-[32rem] w-full translate-y-0 p-4 opacity-100 lg:w-72 lg:translate-x-0 lg:translate-y-0'
+          ? 'h-full max-h-full w-full translate-y-0 p-4 opacity-100 lg:w-72 lg:translate-x-0 lg:translate-y-0'
           : 'max-h-0 w-full -translate-y-3 border-transparent p-0 opacity-0 lg:w-0 lg:min-w-0 lg:-translate-x-3 lg:translate-y-0',
         className,
       ].join(' ')}
     >
-      <div className={isOpen ? 'block' : 'hidden'}>{children}</div>
+      <div className={isOpen ? 'block h-full min-h-0 max-h-full' : 'hidden'}>{children}</div>
     </div>
   )
 }
@@ -38,11 +38,11 @@ export function CollapsiblePanelItem(props: CollapsiblePanelItemProps) {
   return (
     <section
       className={[
-        'space-y-4 rounded-xl border border-[rgba(24,57,57,0.18)] bg-white/80 p-4 shadow-sm backdrop-blur-sm',
+        'grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 rounded-xl border border-[rgba(24,57,57,0.18)] bg-white/80 p-4 shadow-sm backdrop-blur-sm',
         className,
       ].join(' ')}
     >
-      <div>
+      <div className="shrink-0">
         <h3 className="m-0 text-lg font-semibold text-[var(--text-main)]">{title}</h3>
         <p className="mt-1 mb-0 text-sm text-slate-600">{description}</p>
       </div>

@@ -1,10 +1,8 @@
-// MainContent.tsx
-
 import type { TargetLanguage } from '../components/targetLanguages'
+import Passage from '../components/Passage'
 import LookupInstructions from '../components/LookupInstructions'
 import type { TranslationRecord } from '../data/translationData'
 import Translation from '../components/Translation'
-import Passage from './Passage'
 
 type MainContentColumnProps = {
   passage: string
@@ -13,40 +11,39 @@ type MainContentColumnProps = {
   onTranslate: () => void
   onClear: () => void
   translations: TranslationRecord[]
-  isTranslating: boolean        // ← add
 }
 
 export default function MainContent(props: MainContentColumnProps) {
-  const {
-    passage,
-    targetLanguage,
-    onPassageChange,
-    onTranslate,
-    onClear,
-    isTranslating,              // ← add
-  } = props
+  const { passage, targetLanguage, onPassageChange, onTranslate, onClear } = props
 
   return (
-    <main className="flex-1 rounded-lg border-4 border-[var(--card-border)] p-4">
-      <div className="mb-4" />
+    <main className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border-4 border-[var(--card-border)] p-4">
+      {/* Top spacing for the main content area */}
+      <div className="mb-4 shrink-0"></div>
 
-      <h1 className="m-4 text-center text-4xl font-extrabold">Read Up</h1>
-      <p className="text-center">
+      {/* Page title */}
+      <h1 className="m-4 shrink-0 text-center text-4xl font-extrabold">Read Up</h1>
+      {/* Short description of the app's purpose */}
+      <p className="shrink-0 text-center">
         Turn any text into an interactive learning experience — translate,
         explore vocabulary, and truly understand what you read.
       </p>
 
-      <Passage
-        passage={passage}
-        targetLanguage={targetLanguage}
-        onPassageChange={onPassageChange}
-        onTranslate={onTranslate}
-        onClear={onClear}
-        isTranslating={isTranslating}   // ← add
-      />
+      {/* Input area for entering text and triggering translation */}
+      <div className="shrink-0">
+        <Passage
+          passage={passage}
+          targetLanguage={targetLanguage}
+          onPassageChange={onPassageChange}
+          onTranslate={onTranslate}
+          onClear={onClear}
+        />
+      </div>
 
+      {/* Displays translated results */}
       <Translation translations={props.translations} />
 
+      {/* Explains how the future lookup flow will work */}
       {props.translations.length > 0 && (
         <LookupInstructions targetLanguage={targetLanguage} />
       )}
