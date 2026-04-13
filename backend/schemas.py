@@ -1,8 +1,13 @@
+# schemas.py — complete rewrite
+
 import re
 from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel, field_validator
+from typing import Optional, List
+from enum import Enum
+from pydantic import BaseModel, field_validator, model_validator
 
+
+# ── Auth Schemas ───────────────────────────────────────────────────────────────
 
 class SignUpRequest(BaseModel):
     username: str
@@ -38,6 +43,37 @@ class SignUpRequest(BaseModel):
         return v
 
 
+class VerifyRequest(BaseModel):
+    email: str
+    code: str
+
+    @field_validator("email")
+    @classmethod
+    def email_lower(cls, v: str) -> str:
+        return v.strip().lower()
+
+    @field_validator("code")
+    @classmethod
+    def code_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Verification code is required")
+        if not v.isdigit():
+            raise ValueError("Verification code must contain only digits")
+        if len(v) not in (6, 8):
+            raise ValueError("Verification code must be 6 or 8 digits")
+        return v
+
+
+class ResendRequest(BaseModel):
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def email_lower(cls, v: str) -> str:
+        return v.strip().lower()
+
+
 class SignInRequest(BaseModel):
     email: str
     password: str
@@ -63,6 +99,122 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+class MessageResponse(BaseModel):
+    message: str
+
+
+# ── Translation Schemas ────────────────────────────────────────────────────────
+
+SUPPORTED_LANGUAGES = [
+    "spanish",
+    "french",
+    "chinese",
+    "german",
+    "portuguese",
+    "japanese",
+]
+
+
+class TranslateRequest(BaseModel):
+    passage: str
+    targetLanguage: Optional[str] = None
+
+    @model_validator(mode="after")
+    def normalize_target_language(self):
+        value = self.targetLanguage
+
+        if not value:
+            raise ValueError(
+                "Target language is required. Send 'targetLanguage'."
+            )
+
+        value = value.strip().lower()
+
+        if value not in SUPPORTED_LANGUAGES:
+            raise ValueError(
+                f"Unsupported language: '{value}'. "
+                f"Choose from: {', '.join(SUPPORTED_LANGUAGES)}"
+            )
+
+        self.targetLanguage = value
+        return self
+
+    @field_validator("passage")
+    @classmethod
+    def passage_not_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Passage cannot be empty")
+        if len(v) > 5000:
+            raise ValueError("Passage cannot exceed 5000 characters")
+        return v
+
+
+class VocabItem(BaseModel):
+    """Single vocab word with its spaCy lemma and POS tag."""
+    word:  str
+    lemma: str
+    pos:   str
+
+    class Config:
+        from_attributes = True
+
+
+class SentenceTranslationResponse(BaseModel):
+    """
+    One translated sentence matching the exact response shape:
+    {
+        uid: 12,
+        sentence: "...",
+        translation: "...",
+        targetLanguage: "portuguese",
+        sessionID: "session-d91e",
+        vocabItems: [ { word, lemma, pos }, ... ]
+    }
+    """
+    uid:            int
+    sentence:       str
+    translation:    str
+    targetLanguage: str
+    sessionID:      str
+    vocabItems:     List[VocabItem]
+
+    class Config:
+        from_attributes = True
+
+
+class TranslateOnlyResponse(BaseModel):
+    """Top-level response wrapping all translated sentences."""
+    translations: List[SentenceTranslationResponse]
+
+    class Config:
+        from_attributes = True
+
+
+# ── Lookup Schemas ─────────────────────────────────────────────────────────────
+
+class LookupType(str, Enum):
+    english_definition  = "english_definition"
+    spanish_translation = "spanish_translation"
+    example_sentence    = "example_sentence"
+    cefr_level          = "cefr_level"
+
+
+class WordLookupRequest(BaseModel):
+    word:            str
+    context:         Optional[str] = None
+    lookup_type:     LookupType
+    target_language: str = "spanish"
+
+
+class WordLookupResponse(BaseModel):
+    word:        str
+    lookup_type: LookupType
+    result:      str
+
+
+# ── Comprehension Schemas ──────────────────────────────────────────────────────
+
 class ComprehensionRequest(BaseModel):
     passage: str
     summary: str
@@ -77,7 +229,7 @@ class ComprehensionRequest(BaseModel):
 
 
 class ComprehensionResponse(BaseModel):
-    score: int
+    score:  int
     advice: str
 
     @field_validator("score")
@@ -96,7 +248,7 @@ class ComprehensionResponse(BaseModel):
         return v
 
 
-# ── Session Schemas ──────────────────────────────────────
+# ── Session Schemas ────────────────────────────────────────────────────────────
 
 class SessionCreateRequest(BaseModel):
     sentence: str
@@ -124,8 +276,8 @@ class SessionUpdateRequest(BaseModel):
 
 
 class SessionResponse(BaseModel):
-    id: int
-    title: str
+    id:         int
+    title:      str
     created_at: datetime
     updated_at: datetime
 
@@ -133,10 +285,10 @@ class SessionResponse(BaseModel):
         from_attributes = True
 
 
-# ── Passage Schemas ─────────────────────────────────────
+# ── Passage Schemas ────────────────────────────────────────────────────────────
 
 class PassageCreateRequest(BaseModel):
-    sentence: str
+    sentence:    str
     translation: Optional[str] = None
 
     @field_validator("sentence")
@@ -158,7 +310,7 @@ class PassageCreateRequest(BaseModel):
 
 
 class PassageUpdateRequest(BaseModel):
-    sentence: Optional[str] = None
+    sentence:    Optional[str] = None
     translation: Optional[str] = None
 
     @field_validator("sentence")
@@ -181,8 +333,8 @@ class PassageUpdateRequest(BaseModel):
 
 
 class PassageResponse(BaseModel):
-    id: int
-    sentence: str
+    id:          int
+    sentence:    str
     translation: Optional[str] = None
 
     class Config:
@@ -190,11 +342,11 @@ class PassageResponse(BaseModel):
 
 
 class SessionWithPassagesResponse(BaseModel):
-    id: int
-    title: str
+    id:         int
+    title:      str
     created_at: datetime
     updated_at: datetime
-    passages: List[PassageResponse]
+    passages:   List[PassageResponse]
 
     class Config:
         from_attributes = True

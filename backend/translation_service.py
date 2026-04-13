@@ -8,7 +8,7 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, DataError
 
-from models import Passage, Session as SessionModel
+from models import Passage, ReadingSession as SessionModel
 from schemas import PassageCreateRequest, PassageUpdateRequest
 
 # Set up logging for translation operations

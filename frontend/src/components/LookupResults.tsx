@@ -5,6 +5,7 @@ import type { LookupResult } from './translationLookup'
 type Props = {
   results: LookupResult[]
   onDeleteResult: (id: string) => void
+  onSentenceSelection: (uid: number) => void
 }
 
 export default function LookupResults(props: Props) {

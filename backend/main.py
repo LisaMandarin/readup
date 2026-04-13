@@ -1,36 +1,21 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from routers.auth_router import router as auth_router
+from routers.translate_router import router as translation_router
+from routers.lookup_router import router as lookup_router
 from routers.comprehension_router import router as comprehension_router
 from routers.sessions_router import router as sessions_router
 
-# Create tables in Supabase if they don't exist yet
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ReadUp Backend", version="0.1.0")
 
-
-def get_allowed_origins() -> list[str]:
-    """Read comma-separated CORS origins from the environment."""
-    cors_origins = os.getenv("CORS_ORIGINS")
-    if cors_origins:
-        return [
-            origin.strip()
-            for origin in cors_origins.split(",")
-            if origin.strip()
-        ]
-
-    return [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
-
-
-origins = get_allowed_origins()
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,6 +26,9 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(translation_router)
+app.include_router(lookup_router)
+
 app.include_router(comprehension_router)
 app.include_router(sessions_router)
 

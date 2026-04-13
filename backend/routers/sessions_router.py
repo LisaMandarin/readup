@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Dict, Any
 from auth import get_current_user
 from database import get_db
-from models import User, Session as SessionModel, Passage
+from models import User, ReadingSession as SessionModel, Passage
 from schemas import (
     SessionCreateRequest,
     SessionUpdateRequest,
