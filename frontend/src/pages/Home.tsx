@@ -1,12 +1,12 @@
 import { UpOutlined } from '@ant-design/icons'
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { Alert, ConfigProvider, Spin } from 'antd'
-import translationData, {
-  type TranslationRecord,
-} from '../data/translationData'
-import sessionHistoryData from '../data/sessionHistoryData'
+import { getTranslationSessionById } from '../api/session'
+import { translateText } from '../api/translate'
 import { useAuth } from '../context/AuthContext'
 import type { TargetLanguage } from '../components/targetLanguages'
+import type { TranslationRecord } from '../types/translation'
 import MainContent from './MainContent'
 import Sidebar from './Sidebar'
 import type { MenuKey } from './homeTypes'
@@ -19,6 +19,9 @@ export default function Home() {
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
   const [translations, setTranslations] = useState<TranslationRecord[]>([])
+  const [isTranslating, setIsTranslating] = useState(false)
+  const [isLoadingSession, setIsLoadingSession] = useState(false)
+  const [translateError, setTranslateError] = useState<string | null>(null)
   const [isBackToTopVisible, setIsBackToTopVisible] = useState(false)
 
   useEffect(() => {
@@ -38,59 +41,81 @@ export default function Home() {
     setActiveMenu((currentKey) => (currentKey === key ? null : key))
   }
 
-  const handleTranslate = () => {
-    if (passage.trim().length === 0 || targetLanguage.length === 0) {
+  const handleTranslate = async () => {
+    if (passage.trim().length === 0 || !targetLanguage) {
       return
     }
 
-    const selectedSession = translationData.find(
-      (item) => item.targetLanguage === targetLanguage
-    )
+    setIsTranslating(true)
+    setTranslateError(null)
 
-    if (!selectedSession) {
+    try {
+      const { data } = await translateText({
+        passage: passage.trim(),
+        targetLanguage,
+      })
+      setTranslations(data.translations)
+    } catch (error) {
       setTranslations([])
-      return
+
+      if (axios.isAxiosError(error)) {
+        const detail = error.response?.data?.detail
+
+        setTranslateError(
+          typeof detail === 'string'
+            ? detail
+            : 'Translation failed. Please try again.'
+        )
+      } else {
+        setTranslateError('Translation failed. Please try again.')
+      }
+    } finally {
+      setIsTranslating(false)
     }
-
-    const nextTranslations = translationData.filter(
-      (item) => item.sessionID === selectedSession.sessionID
-    )
-
-    setTranslations(nextTranslations)
   }
 
-  const handleSessionSelect = (sessionID: string) => {
-    const selectedSession = sessionHistoryData.find(
-      (item) => item.sessionID === sessionID
-    )
+  const handleSessionSelect = async (sessionID: string) => {
+    setTranslateError(null)
+    setIsLoadingSession(true)
 
-    const nextTranslations = translationData.filter(
-      (item) => item.sessionID === sessionID
-    )
-
-    if (!selectedSession || nextTranslations.length === 0) {
+    try {
+      const { data } = await getTranslationSessionById(sessionID)
+      setPassage(data.fullPassage)
+      setTargetLanguage(data.targetLanguage)
+      setTranslations(data.translations)
+    } catch (error) {
       setTranslations([])
-      return
+      if (axios.isAxiosError(error)) {
+        const detail = error.response?.data?.detail
+        setTranslateError(
+          typeof detail === 'string'
+            ? detail
+            : 'Could not load the selected session.'
+        )
+      } else {
+        setTranslateError('Could not load the selected session.')
+      }
+    } finally {
+      setIsLoadingSession(false)
     }
-
-    setPassage(selectedSession.passage)
-    setTargetLanguage(selectedSession.targetLanguage)
-    setTranslations(nextTranslations)
   }
 
   const handlePassageChange = (value: string) => {
     setPassage(value)
     setTranslations([])
+    setTranslateError(null)
   }
 
   const handleClear = () => {
     setPassage('')
     setTranslations([])
+    setTranslateError(null)
   }
 
   const handleTargetLanguageChange = (value: TargetLanguage | '') => {
     setTargetLanguage(value)
     setTranslations([])
+    setTranslateError(null)
   }
 
   const handleBackToTop = () => {
@@ -106,7 +131,7 @@ export default function Home() {
         <div
           className={[
             'flex min-h-screen flex-col justify-between px-6 py-6 transition-opacity duration-200',
-            isSigningOut ? 'opacity-50' : 'opacity-100',
+            isSigningOut || isLoadingSession ? 'opacity-50' : 'opacity-100',
           ].join(' ')}
         >
           {signOutError && (
@@ -143,6 +168,8 @@ export default function Home() {
               onTranslate={handleTranslate}
               onClear={handleClear}
               translations={translations}
+              isTranslating={isTranslating}
+              translateError={translateError}
             />
           </div>
 
@@ -151,12 +178,12 @@ export default function Home() {
           </footer>
         </div>
 
-        {isSigningOut && (
+        {(isSigningOut || isLoadingSession) && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-[rgba(243,250,250,0.5)] backdrop-blur-[1px]">
             <div className="rounded-2xl border border-[rgba(127,29,29,0.18)] bg-white/90 px-8 py-6 text-center shadow-lg">
               <Spin size="large" />
               <p className="mt-4 mb-0 text-sm font-medium text-[var(--text-main)]">
-                Signing you out...
+                {isSigningOut ? 'Signing you out...' : 'Loading session...'}
               </p>
             </div>
           </div>

@@ -1,7 +1,8 @@
 import type { TargetLanguage } from '../components/targetLanguages'
+import { Alert } from 'antd'
 import Passage from '../components/Passage'
 import LookupInstructions from '../components/LookupInstructions'
-import type { TranslationRecord } from '../data/translationData'
+import type { TranslationRecord } from '../types/translation'
 import Translation from '../components/Translation'
 
 type MainContentColumnProps = {
@@ -11,10 +12,20 @@ type MainContentColumnProps = {
   onTranslate: () => void
   onClear: () => void
   translations: TranslationRecord[]
+  isTranslating: boolean
+  translateError: string | null
 }
 
 export default function MainContent(props: MainContentColumnProps) {
-  const { passage, targetLanguage, onPassageChange, onTranslate, onClear } = props
+  const {
+    passage,
+    targetLanguage,
+    onPassageChange,
+    onTranslate,
+    onClear,
+    isTranslating,
+    translateError,
+  } = props
 
   return (
     <main className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border-4 border-[var(--card-border)] p-4">
@@ -37,8 +48,15 @@ export default function MainContent(props: MainContentColumnProps) {
           onPassageChange={onPassageChange}
           onTranslate={onTranslate}
           onClear={onClear}
+          isTranslating={isTranslating}
         />
       </div>
+
+      {translateError && (
+        <div className="mt-4 shrink-0">
+          <Alert type="error" showIcon message="Translation failed" description={translateError} />
+        </div>
+      )}
 
       {/* Displays translated results */}
       <Translation translations={props.translations} />

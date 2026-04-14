@@ -1,5 +1,5 @@
 import type { PopupCopy } from '../data/popupCopyByLanguage'
-import type { TranslationRecord } from '../data/translationData'
+import type { TranslationRecord } from '../types/translation'
 
 export type PopupState = {
   top: number

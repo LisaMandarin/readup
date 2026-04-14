@@ -248,20 +248,6 @@ class ComprehensionResponse(BaseModel):
         return v
 
 
-# ── Session Schemas ────────────────────────────────────────────────────────────
-
-class SessionCreateRequest(BaseModel):
-    sentence: str
-
-    @field_validator("sentence")
-    @classmethod
-    def sentence_non_empty(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("Sentence cannot be empty")
-        return v
-
-
 class SessionUpdateRequest(BaseModel):
     title: Optional[str] = None
 
@@ -270,83 +256,28 @@ class SessionUpdateRequest(BaseModel):
     def title_valid(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
             v = v.strip()
-            if len(v) < 1 or len(v) > 100:
-                raise ValueError("Title must be 1-100 characters")
+            if len(v) < 1 or len(v) > 255:
+                raise ValueError("Title must be 1-255 characters")
         return v
 
 
-class SessionResponse(BaseModel):
-    id:         int
-    title:      str
-    created_at: datetime
-    updated_at: datetime
+# ── Translation Session Schemas ───────────────────────────────────────────────
 
-    class Config:
-        from_attributes = True
-
-
-# ── Passage Schemas ────────────────────────────────────────────────────────────
-
-class PassageCreateRequest(BaseModel):
-    sentence:    str
-    translation: Optional[str] = None
-
-    @field_validator("sentence")
-    @classmethod
-    def sentence_non_empty(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("Sentence cannot be empty")
-        return v
-
-    @field_validator("translation")
-    @classmethod
-    def translation_optional(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            v = v.strip()
-            if not v:
-                return None
-        return v
+class TranslationSessionSummaryResponse(BaseModel):
+    sessionID:      str
+    title:          str
+    passagePreview: str
+    targetLanguage: str
+    createdAt:      datetime
+    updatedAt:      datetime
 
 
-class PassageUpdateRequest(BaseModel):
-    sentence:    Optional[str] = None
-    translation: Optional[str] = None
-
-    @field_validator("sentence")
-    @classmethod
-    def sentence_optional(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            v = v.strip()
-            if not v:
-                raise ValueError("Sentence cannot be empty")
-        return v
-
-    @field_validator("translation")
-    @classmethod
-    def translation_optional(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            v = v.strip()
-            if not v:
-                return None
-        return v
-
-
-class PassageResponse(BaseModel):
-    id:          int
-    sentence:    str
-    translation: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
-
-class SessionWithPassagesResponse(BaseModel):
-    id:         int
-    title:      str
-    created_at: datetime
-    updated_at: datetime
-    passages:   List[PassageResponse]
-
-    class Config:
-        from_attributes = True
+class TranslationSessionDetailResponse(BaseModel):
+    sessionID:      str
+    title:          str
+    passagePreview: str
+    fullPassage:    str
+    targetLanguage: str
+    createdAt:      datetime
+    updatedAt:      datetime
+    translations:   List[SentenceTranslationResponse]

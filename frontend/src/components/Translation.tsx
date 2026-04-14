@@ -8,7 +8,7 @@ import {
 import useTranslationLookup from './useTranslationLookup'
 import targetLanguageNames from '../data/targetLanguageNames.json'
 import popupCopyByLanguage from '../data/popupCopyByLanguage'
-import type { TranslationRecord } from '../data/translationData'
+import type { TranslationRecord } from '../types/translation'
 
 type Props = {
   translations: TranslationRecord[]

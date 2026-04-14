@@ -1,46 +1,53 @@
 import API from "./auth";
+import type { TargetLanguage } from "../components/targetLanguages";
 
-export interface SessionListItem {
+export interface TranslationSessionSummary {
   sessionID: string;
   title: string;
   passagePreview: string;
-  targetLanguage: string;
-  createdAt: string;
-}
-
-export interface TranslationItem {
-  uid: number;
-  sentence: string;
-  translation: string;
-  lemma: string;
-  pos: string;
-}
-
-export interface SessionDetail {
-  sessionID: string;
-  userID: string;
-  title: string;
-  passagePreview: string;
-  fullPassage: string;
-  targetLanguage: string;
+  targetLanguage: TargetLanguage;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SessionResponse {
-  session: SessionDetail;
-  translations: TranslationItem[];
+export interface TranslationSessionSentence {
+  uid: number;
+  sentence: string;
+  translation: string;
+  targetLanguage: TargetLanguage;
+  sessionID: string;
+  vocabItems: Array<{
+    word: string;
+    lemma: string;
+    pos: string;
+  }>;
 }
 
-export interface DeleteSessionResponse {
+export interface TranslationSessionDetail {
+  sessionID: string;
+  title: string;
+  passagePreview: string;
+  fullPassage: string;
+  targetLanguage: TargetLanguage;
+  createdAt: string;
+  updatedAt: string;
+  translations: TranslationSessionSentence[];
+}
+
+export interface DeleteTranslationSessionResponse {
   message: string;
 }
 
-export const getSessions = () =>
-  API.get<SessionListItem[]>("/api/sessions");
+export const getTranslationSessions = () =>
+  API.get<TranslationSessionSummary[]>("/api/sessions");
 
-export const getSessionById = (sessionId: string) =>
-  API.get<SessionResponse>(`/api/sessions/${sessionId}`);
+export const getTranslationSessionById = (sessionId: string) =>
+  API.get<TranslationSessionDetail>(`/api/sessions/${sessionId}`);
 
-export const deleteSession = (sessionId: string) =>
-  API.delete<DeleteSessionResponse>(`/api/sessions/${sessionId}`);
+export const deleteTranslationSession = (sessionId: string) =>
+  API.delete<DeleteTranslationSessionResponse>(`/api/sessions/${sessionId}`);
+
+export const deleteTranslationSessionSentence = (
+  sessionId: string,
+  uid: number
+) => API.delete<{ message: string }>(`/api/sessions/${sessionId}/sentences/${uid}`);

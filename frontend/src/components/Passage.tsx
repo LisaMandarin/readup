@@ -9,14 +9,23 @@ type Props = {
   onPassageChange: (value: string) => void;
   onTranslate: () => void;
   onClear: () => void;
+  isTranslating: boolean;
 };
 
 export default function Passage(props: Props) {
-  const { passage, targetLanguage, onPassageChange, onTranslate, onClear } =
+  const {
+    passage,
+    targetLanguage,
+    onPassageChange,
+    onTranslate,
+    onClear,
+    isTranslating,
+  } =
     props;
   const [isComprehensionOpen, setIsComprehensionOpen] = useState(false);
   const hasPassage = passage.trim().length > 0;
-  const isTranslateDisabled = !hasPassage || targetLanguage.length === 0;
+  const isTranslateDisabled =
+    !hasPassage || targetLanguage.length === 0 || isTranslating;
   const needsTargetLanguage = hasPassage && targetLanguage.length === 0;
 
   const resetComprehension = () => {
@@ -55,6 +64,7 @@ export default function Passage(props: Props) {
           type="primary"
           onClick={onTranslate}
           disabled={isTranslateDisabled}
+          loading={isTranslating}
         >
           Translation
         </Button>

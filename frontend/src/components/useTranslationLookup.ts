@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { PopupCopy } from '../data/popupCopyByLanguage'
-import type { TranslationRecord } from '../data/translationData'
+import type { TranslationRecord } from '../types/translation'
 import {
   defaultLookupOptions,
   getLookupResultId,

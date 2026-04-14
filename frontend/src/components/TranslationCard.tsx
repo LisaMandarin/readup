@@ -1,7 +1,7 @@
 import { DownOutlined, TranslationOutlined, UpOutlined } from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
 
-import type { TranslationRecord } from '../data/translationData'
+import type { TranslationRecord } from '../types/translation'
 import type { LookupResult } from './translationLookup'
 import LookupResults from './LookupResults'
 

@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: apiBaseUrl,
 });
 
 // Attach JWT to every outgoing request
@@ -56,15 +58,32 @@ export const translateRequest = (body: TranslateRequestBody) =>
 export interface SessionSummary {
   sessionID: string
   title: string
-  passage_preview: string
-  target_language: string
-  created_at: string
+  passagePreview: string
+  targetLanguage: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SessionDetailResponse {
   sessionID: string
+  title: string
+  passagePreview: string
+  fullPassage: string
   targetLanguage: string
-  translations: SentenceTranslationResponse[]
+  createdAt: string
+  updatedAt: string
+  translations: Array<{
+    uid: number
+    sentence: string
+    translation: string
+    targetLanguage: string
+    sessionID: string
+    vocabItems: Array<{
+      word: string
+      lemma: string
+      pos: string
+    }>
+  }>
 }
 
 export const getSessionsRequest = () =>
