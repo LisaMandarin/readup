@@ -1,90 +1,63 @@
 # ReadUp
 
-This is a collaborative repository shared by **Min-ting (Lisa) Chuang** and **Oluwatigbo Alao** for the course **CSE499 Senior Project**.  
+ReadUp is a CSE499 Senior Project focused on helping English language learners improve reading comprehension and vocabulary through AI-assisted translation and lookup tools.
 
-ReadUp aims to support **English language learners** by enhancing their reading comprehension and expanding their vocabulary through **AI-powered interactive learning tools**.
+This repository is maintained by **Min-ting (Lisa) Chuang**, **Oluwatigbo Alao**, and **Johnathan Babb**.
 
----
+## Project overview
 
-## Project structure
+The current application includes:
 
-- `frontend/` – React + TypeScript + Vite app  
-  - Uses **Tailwind CSS** for styling  
-  - Uses **Ant Design (antd)** for UI components  
-  - Includes a demo page that can call the backend `/health` endpoint
-- `backend/` – **FastAPI** service (Python)  
-  - Provides a basic root endpoint `/` and a health check `/health`  
-  - Configured with CORS to allow requests from the Vite dev server
-- `database` – **Supabase PostgreSQL**  
-  - Stores application data for the FastAPI backend
+- account signup, email verification, sign in, and sign out
+- passage translation into supported target languages
+- sentence-level vocabulary lookup
+- comprehension feedback on user-written summaries
+- saved translation sessions with reload and delete flows
 
----
+## Repository structure
 
-## Getting started
+- `frontend/`: React 19 + TypeScript + Vite application
+- `backend/`: FastAPI + SQLAlchemy service
+- Supabase PostgreSQL: primary database and auth integration
 
-### 1. Clone the repository
+## Quick start
 
-```bash
-git clone <your-repo-url>
-cd readup
-```
-
-### 2. Backend setup (FastAPI)
+Start the backend first:
 
 ```bash
 cd backend
-cp .env.example .env
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 uvicorn main:app --reload
 ```
 
-After copying `.env.example`, edit `.env` and replace the example values with your real credentials.
-
-The API will be available at `http://127.0.0.1:8000`, with docs at `http://127.0.0.1:8000/docs`.
-
-### 3. Frontend setup (React + Vite)
-
-In a separate terminal, from the project root:
+Then start the frontend in a separate terminal:
 
 ```bash
 cd frontend
-cp .env.example .env
 npm install
 npm run dev
 ```
 
-After copying `.env.example`, edit `.env` and set:
+Before running either app, create local `.env` files with the required variables described in:
 
-- `VITE_API_BASE_URL`
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- [frontend/README.md](/Users/lisachuang/Documents/BYUI/readup/frontend/README.md)
+- [backend/README.md](/Users/lisachuang/Documents/BYUI/readup/backend/README.md)
 
-The frontend will be available at `http://localhost:5173`.  
-When both frontend and backend are running, the **“Call Backend Health Check”** button on the homepage will call the FastAPI `/health` endpoint and display its status.
+Local development URLs:
 
----
+- frontend: `http://localhost:5173`
+- backend: `http://127.0.0.1:8000`
+- backend docs: `http://127.0.0.1:8000/docs`
 
-## More details
+## Deployment
 
-- Frontend instructions: see `frontend/README.md`
-- Backend instructions: see `backend/README.md`
-
-## Deployment notes
-
-- Frontend: deploy the `frontend/` app to Vercel with `frontend` as the root directory
-- Backend: deploy the `backend/` app to Render as a Web Service
-- Database: Supabase PostgreSQL
+- frontend: Vercel
+- backend: Render
+- database/auth: Supabase
 
 ## Production URLs
 
-- Frontend: `https://readup-topaz.vercel.app`
-- Backend: `https://readup-backend.onrender.com`
-- Backend health check: `https://readup-backend.onrender.com/health`
-
-## Favorite Quotes
-
-- If you fail to plan, you plan to fail.
-
-- As long as Oluwa is involved. #oluwatigboalao11
-
-- "The most important step a man can take is always the next one" - Dallinar Kholin
+- frontend: `https://readup-topaz.vercel.app`
+- backend: `https://readup-backend.onrender.com`
+- backend health check: `https://readup-backend.onrender.com/health`

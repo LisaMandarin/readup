@@ -1,99 +1,113 @@
-# ReadUp Backend (FastAPI)
+# ReadUp Backend
 
-This backend is built with **FastAPI** and served using **Uvicorn**.
-It connects to **Supabase** (PostgreSQL) for data storage.
+ReadUp backend is a FastAPI application backed by PostgreSQL via SQLAlchemy.
 
-## Local development setup
+It currently handles:
 
-From the `backend` directory:
+- app authentication endpoints layered on top of Supabase Auth
+- translation session creation and retrieval
+- word lookup enrichment through Gemini
+- comprehension scoring through Gemini
+- persistent sentence translations and lookup results
 
-```bash
-cd backend
-cp .env.example .env        
-pip install -r requirements.txt
-```
+## Stack
 
-The `cp .env.example .env` step is for local development only.
-After copying, edit `.env` and replace the example values with your real credentials.
+- FastAPI + Uvicorn
+- SQLAlchemy + PostgreSQL
+- Supabase Auth
+- spaCy `en_core_web_sm` for English sentence splitting and vocab extraction
+- `deep-translator` for sentence translation
+- Gemini for lookup/comprehension responses
 
-Required environment variables:
+## Required environment variables
 
-- `DATABASE_URL`: PostgreSQL connection string
-- `SECRET_KEY`: JWT signing secret
-- `CORS_ORIGINS`: comma-separated frontend origins
-- `GEMINI_API_KEY`: Google Gemini API key for summary evaluation
-
-Optional environment variables:
-
-- `GEMINI_MODEL`: Gemini model name, defaults to `gemini-2.5-flash`
-
-Example:
+Create `backend/.env` with:
 
 ```env
 DATABASE_URL=postgresql://username:password@host:5432/database_name
 SECRET_KEY=replace-with-a-long-random-secret
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-GEMINI_API_KEY=replace-with-your-google-gemini-api-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-service-role-or-api-key
+GEMINI_API_KEY=your-google-gemini-api-key
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
-## Run the development server
+Notes:
+
+- `DATABASE_URL` is required at import time by `database.py`.
+- `SECRET_KEY`, `SUPABASE_URL`, and `SUPABASE_KEY` are required at import time by `auth.py`.
+- `GEMINI_API_KEY` is required when calling lookup/comprehension features.
+- `GEMINI_MODEL` is optional and defaults to `gemini-2.5-flash`.
+
+## Install
+
+From `backend/`:
 
 ```bash
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+```
+
+The repository currently includes `spacy` in `requirements.txt`, and `language_tools.py` will raise an error if the `en_core_web_sm` model is missing.
+
+## Run locally
+
+```bash
+cd backend
 uvicorn main:app --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+Local URLs:
 
-- Docs (Swagger UI): `http://127.0.0.1:8000/docs`
+- API root: `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
+- Health check: `GET /health`
 
-## Comprehension evaluation API
+## Current routes
 
-Authenticated users can evaluate a summary with:
+Authentication:
 
-```http
-POST /api/comprehension/
-Authorization: Bearer <token>
-Content-Type: application/json
-```
+- `POST /auth/signup`
+- `POST /auth/verify`
+- `POST /auth/resend`
+- `POST /auth/signin`
+- `GET /auth/me`
 
-Example request body:
+Translation:
 
-```json
-{
-  "passage": "Original passage text...",
-  "summary": "Student summary text..."
-}
-```
+- `GET /api/translate/languages`
+- `POST /api/translate`
 
-Example response:
+Lookup:
 
-```json
-{
-  "score": 4,
-  "advice": "Your summary captures the main point clearly..."
-}
-```
+- `POST /api/lookup`
 
-## Deploy on Render
+Comprehension:
 
-Create a **Web Service** pointing at the `backend` directory.
+- `POST /api/comprehension/`
 
-- Build command: `pip install -r requirements.txt`
-- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-- This backend does not use `spacy`; if the Render dashboard still runs a `python -m spacy ...` command from an older setup, remove it.
+Sessions:
 
-Do not create a `.env` file on Render. Set these environment variables in the Render dashboard:
+- `GET /api/sessions`
+- `GET /api/sessions/{session_id}`
+- `PUT /api/sessions/{session_id}`
+- `DELETE /api/sessions/{session_id}`
+- `DELETE /api/sessions/{session_id}/sentences/{uid}`
+- `DELETE /api/sessions/{session_id}/lookup-results/{lookup_result_id}`
 
-- `DATABASE_URL`
-- `SECRET_KEY`
-- `CORS_ORIGINS`
-- `GEMINI_API_KEY`
-- `GEMINI_MODEL` (optional)
+## Important implementation notes
 
-Example production `CORS_ORIGINS` value:
+- Database tables are created automatically on startup via `Base.metadata.create_all(bind=engine)` in `main.py`.
+- CORS is currently hardcoded in `main.py` to allow only:
+  - `http://localhost:5173`
+  - `http://127.0.0.1:5173`
+- `CORS_ORIGINS` is not currently read from environment variables, so deployment changes require editing `main.py`.
 
-```env
-https://your-frontend.onrender.com
-```
+## Deploy notes
+
+If you deploy this backend, make sure the runtime has:
+
+- all environment variables above
+- the spaCy package and `en_core_web_sm` model installed
+- network access to Supabase, Gemini, and the translation provider used by `deep-translator`
