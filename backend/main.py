@@ -6,7 +6,6 @@ from routers.auth_router import router as auth_router
 from routers.translate_router import router as translation_router
 from routers.lookup_router import router as lookup_router
 from routers.comprehension_router import router as comprehension_router
-from routers.sessions_router import router as sessions_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -30,7 +29,6 @@ app.include_router(translation_router)
 app.include_router(lookup_router)
 
 app.include_router(comprehension_router)
-app.include_router(sessions_router)
 
 
 @app.get("/health")

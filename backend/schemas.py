@@ -191,6 +191,20 @@ class TranslateOnlyResponse(BaseModel):
         from_attributes = True
 
 
+class TranslationSessionSummary(BaseModel):
+    """Lightweight session metadata for the session-history list."""
+    sessionID:      str
+    title:          str
+    passagePreview: str
+    fullPassage:    str
+    targetLanguage: str
+    createdAt:      datetime
+    updatedAt:      datetime
+
+    class Config:
+        from_attributes = True
+
+
 # ── Lookup Schemas ─────────────────────────────────────────────────────────────
 
 class LookupType(str, Enum):

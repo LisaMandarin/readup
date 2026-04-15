@@ -1,6 +1,6 @@
 # ReadUp
 
-This is a collaborative repository shared by **Min-ting (Lisa) Chuang** and **Oluwatigbo Alao** for the course **CSE499 Senior Project**.  
+This is a collaborative repository shared by **Min-ting (Lisa) Chuang** and **Oluwatigbo Alao** and **Johnathan Babb** for the course **CSE499 Senior Project**.
 
 ReadUp aims to support **English language learners** by enhancing their reading comprehension and expanding their vocabulary through **AI-powered interactive learning tools**.
 
@@ -8,14 +8,14 @@ ReadUp aims to support **English language learners** by enhancing their reading 
 
 ## Project structure
 
-- `frontend/` – React + TypeScript + Vite app  
-  - Uses **Tailwind CSS** for styling  
-  - Uses **Ant Design (antd)** for UI components  
+- `frontend/` – React + TypeScript + Vite app
+  - Uses **Tailwind CSS** for styling
+  - Uses **Ant Design (antd)** for UI components
   - Includes a demo page that can call the backend `/health` endpoint
-- `backend/` – **FastAPI** service (Python)  
-  - Provides a basic root endpoint `/` and a health check `/health`  
+- `backend/` – **FastAPI** service (Python)
+  - Provides a basic root endpoint `/` and a health check `/health`
   - Configured with CORS to allow requests from the Vite dev server
-- `database` – **Supabase PostgreSQL**  
+- `database` – **Supabase PostgreSQL**
   - Stores application data for the FastAPI backend
 
 ---

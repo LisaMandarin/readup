@@ -12,6 +12,7 @@ from models import User, TranslationSession, SentenceTranslation
 from schemas import (
     TranslateRequest,
     TranslateOnlyResponse,
+    TranslationSessionSummary,
     SentenceTranslationResponse,
     VocabItem,
     SUPPORTED_LANGUAGES,
@@ -295,6 +296,51 @@ async def get_user_translation_sessions(
             )
 
     return TranslateOnlyResponse(translations=all_translations)
+
+
+@router.get("/sessions", response_model=list[TranslationSessionSummary])
+async def list_translation_sessions(
+    current_user: User    = Depends(get_current_user),
+    db:           Session = Depends(get_db),
+):
+    """List all translation sessions for the current user (metadata only)."""
+    sessions = (
+        db.query(TranslationSession)
+        .filter(TranslationSession.user_id == current_user.id)
+        .order_by(TranslationSession.updated_at.desc())
+        .all()
+    )
+    return [
+        TranslationSessionSummary(
+            sessionID      = s.session_id,
+            title          = s.title,
+            passagePreview = s.passage_preview,
+            fullPassage    = s.full_passage,
+            targetLanguage = s.target_language,
+            createdAt      = s.created_at,
+            updatedAt      = s.updated_at,
+        )
+        for s in sessions
+    ]
+
+
+@router.get("/sessions/{session_id}", response_model=TranslationSessionSummary)
+async def get_translation_session_summary(
+    session_id:   str,
+    current_user: User    = Depends(get_current_user),
+    db:           Session = Depends(get_db),
+):
+    """Get metadata (including full passage) for a single translation session."""
+    session = get_translation_session(session_id, current_user.id, db)
+    return TranslationSessionSummary(
+        sessionID      = session.session_id,
+        title          = session.title,
+        passagePreview = session.passage_preview,
+        fullPassage    = session.full_passage,
+        targetLanguage = session.target_language,
+        createdAt      = session.created_at,
+        updatedAt      = session.updated_at,
+    )
 
 
 @router.get("/{session_id}", response_model=TranslateOnlyResponse)
