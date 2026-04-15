@@ -10,6 +10,9 @@ export interface VocabOptionsRequest {
 }
 
 export interface WordLookupRequest {
+  session_id: string
+  uid: number
+  selected_text: string
   word: string
   lemma: string
   pos: string
@@ -18,6 +21,7 @@ export interface WordLookupRequest {
 }
 
 export interface WordLookupResponse {
+  id: string
   word: string
   lemma: string
   pos: string

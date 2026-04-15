@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { fetchWordLookup } from '../api/lookup'
+import { deleteTranslationLookupResult } from '../api/session'
 import type { TranslationRecord } from '../types/translation'
 import {
   defaultLookupOptions,
@@ -16,16 +17,25 @@ import {
 
 type Params = {
   translations: TranslationRecord[]
+  initialLookupResults: LookupResult[]
 }
 
 export default function useTranslationLookup(params: Params) {
-  const { translations } = params
+  const { translations, initialLookupResults } = params
   const [popup, setPopup] = useState<PopupState | null>(null)
   const [lookupOptions, setLookupOptions] =
     useState<LookupOptionsState>(defaultLookupOptions)
-  const [lookupResults, setLookupResults] = useState<LookupResult[]>([])
+  const [lookupResults, setLookupResults] =
+    useState<LookupResult[]>(initialLookupResults)
   const [isLookingUp, setIsLookingUp] = useState(false)
   const popupRef = useRef<HTMLDivElement | null>(null)
+  const sessionID = translations[0]?.sessionID ?? ''
+
+  useEffect(() => {
+    setLookupResults(initialLookupResults)
+    setPopup(null)
+    setLookupOptions(defaultLookupOptions)
+  }, [initialLookupResults, sessionID])
 
   useEffect(() => {
     if (!popup) {
@@ -70,7 +80,11 @@ export default function useTranslationLookup(params: Params) {
     }))
   }
 
-  const handleLookupResultDelete = (id: string) => {
+  const handleLookupResultDelete = async (id: string) => {
+    if (sessionID) {
+      await deleteTranslationLookupResult(sessionID, id)
+    }
+
     setLookupResults((current) => current.filter((result) => result.id !== id))
   }
 
@@ -84,18 +98,22 @@ export default function useTranslationLookup(params: Params) {
       popup.uid,
       popup.selectedText
     )
-    const resultId = getLookupResultId(popup.uid, popup.selectedText)
     const targetLanguage = translations[0]?.targetLanguage
     const requestedOptions = { ...lookupOptions }
 
-    if (!targetLanguage) {
+    if (!targetLanguage || !sessionID) {
       return
     }
+
+    const fallbackResultId = getLookupResultId(sessionID, popup.uid, lemma)
 
     setIsLookingUp(true)
 
     try {
       const response = await fetchWordLookup({
+        session_id: sessionID,
+        uid: popup.uid,
+        selected_text: popup.selectedText,
         word: popup.selectedText,
         lemma,
         pos: partOfSpeech,
@@ -105,7 +123,7 @@ export default function useTranslationLookup(params: Params) {
 
       const nextResult: LookupResult = {
         uid: popup.uid,
-        id: resultId,
+        id: response.id,
         selectedText: popup.selectedText,
         partOfSpeech,
         lemma,
@@ -117,7 +135,7 @@ export default function useTranslationLookup(params: Params) {
       }
 
       setLookupResults((current) => {
-        const existingIndex = current.findIndex((result) => result.id === resultId)
+        const existingIndex = current.findIndex((result) => result.id === response.id)
 
         if (existingIndex === -1) {
           return [...current, nextResult]
@@ -132,7 +150,7 @@ export default function useTranslationLookup(params: Params) {
     } catch (error) {
       const nextResult: LookupResult = {
         uid: popup.uid,
-        id: resultId,
+        id: fallbackResultId,
         selectedText: popup.selectedText,
         partOfSpeech,
         lemma,
@@ -145,7 +163,7 @@ export default function useTranslationLookup(params: Params) {
       }
 
       setLookupResults((current) => {
-        const existingIndex = current.findIndex((result) => result.id === resultId)
+        const existingIndex = current.findIndex((result) => result.id === fallbackResultId)
 
         if (existingIndex === -1) {
           return [...current, nextResult]

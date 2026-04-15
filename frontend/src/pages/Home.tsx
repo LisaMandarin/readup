@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Alert, ConfigProvider, Spin } from 'antd'
 import { getTranslationSessionById } from '../api/session'
 import { translateText } from '../api/translate'
+import type { LookupResult } from '../components/translationLookup'
 import { useAuth } from '../context/AuthContext'
 import type { TargetLanguage } from '../components/targetLanguages'
 import type { TranslationRecord } from '../types/translation'
@@ -23,6 +24,7 @@ export default function Home() {
   const [isLoadingSession, setIsLoadingSession] = useState(false)
   const [translateError, setTranslateError] = useState<string | null>(null)
   const [isBackToTopVisible, setIsBackToTopVisible] = useState(false)
+  const [lookupResults, setLookupResults] = useState<LookupResult[]>([])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,8 +57,10 @@ export default function Home() {
         targetLanguage,
       })
       setTranslations(data.translations)
+      setLookupResults([])
     } catch (error) {
       setTranslations([])
+      setLookupResults([])
 
       if (axios.isAxiosError(error)) {
         const detail = error.response?.data?.detail
@@ -83,8 +87,10 @@ export default function Home() {
       setPassage(data.fullPassage)
       setTargetLanguage(data.targetLanguage)
       setTranslations(data.translations)
+      setLookupResults(data.lookupResults)
     } catch (error) {
       setTranslations([])
+      setLookupResults([])
       if (axios.isAxiosError(error)) {
         const detail = error.response?.data?.detail
         setTranslateError(
@@ -103,18 +109,21 @@ export default function Home() {
   const handlePassageChange = (value: string) => {
     setPassage(value)
     setTranslations([])
+    setLookupResults([])
     setTranslateError(null)
   }
 
   const handleClear = () => {
     setPassage('')
     setTranslations([])
+    setLookupResults([])
     setTranslateError(null)
   }
 
   const handleTargetLanguageChange = (value: TargetLanguage | '') => {
     setTargetLanguage(value)
     setTranslations([])
+    setLookupResults([])
     setTranslateError(null)
   }
 
@@ -168,6 +177,7 @@ export default function Home() {
               onTranslate={handleTranslate}
               onClear={handleClear}
               translations={translations}
+              lookupResults={lookupResults}
               isTranslating={isTranslating}
               translateError={translateError}
             />

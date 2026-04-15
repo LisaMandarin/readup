@@ -1,5 +1,6 @@
 import API from "./auth";
 import type { TargetLanguage } from "../components/targetLanguages";
+import type { LookupResult } from "../components/translationLookup";
 
 export interface TranslationSessionSummary {
   sessionID: string;
@@ -32,6 +33,7 @@ export interface TranslationSessionDetail {
   createdAt: string;
   updatedAt: string;
   translations: TranslationSessionSentence[];
+  lookupResults: LookupResult[];
 }
 
 export interface DeleteTranslationSessionResponse {
@@ -51,3 +53,11 @@ export const deleteTranslationSessionSentence = (
   sessionId: string,
   uid: number
 ) => API.delete<{ message: string }>(`/api/sessions/${sessionId}/sentences/${uid}`);
+
+export const deleteTranslationLookupResult = (
+  sessionId: string,
+  lookupResultId: string
+) =>
+  API.delete<{ message: string }>(
+    `/api/sessions/${sessionId}/lookup-results/${encodeURIComponent(lookupResultId)}`
+  );

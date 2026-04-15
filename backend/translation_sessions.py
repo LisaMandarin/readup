@@ -2,8 +2,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from language_tools import nlp
-from models import SentenceTranslation, TranslationSession
-from schemas import SentenceTranslationResponse, VocabItem
+from models import LookupResult, SentenceTranslation, TranslationSession
+from schemas import LookupResultResponse, SentenceTranslationResponse, VocabItem
 
 
 def extract_vocab_items(sentence: str) -> list[VocabItem]:
@@ -43,6 +43,22 @@ def build_sentence_response(
         targetLanguage=target_language,
         sessionID=session_id,
         vocabItems=extract_vocab_items(rec.sentence),
+    )
+
+
+def build_lookup_result_response(rec: LookupResult) -> LookupResultResponse:
+    return LookupResultResponse(
+        id=rec.id,
+        uid=rec.uid,
+        selectedText=rec.selected_text,
+        partOfSpeech=rec.part_of_speech,
+        lemma=rec.lemma,
+        requestedOptions=rec.requested_options,
+        translation=rec.translation,
+        definition=rec.definition,
+        example=rec.example,
+        level=rec.level,
+        error=rec.error,
     )
 
 

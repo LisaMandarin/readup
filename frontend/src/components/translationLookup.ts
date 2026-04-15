@@ -86,5 +86,8 @@ export const toVocabOptionsRequest = (lookupOptions: LookupOptionsState) => ({
   level: lookupOptions.cefrLevel,
 })
 
-export const getLookupResultId = (uid: number, selectedText: string) =>
-  `${uid}-${normalizeToken(selectedText) || selectedText.trim().toLowerCase()}`
+export const getLookupResultId = (
+  sessionID: string,
+  uid: number,
+  lemma: string
+) => `${sessionID}:${uid}:${normalizeToken(lemma) || lemma.trim().toLowerCase()}`

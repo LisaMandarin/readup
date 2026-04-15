@@ -210,6 +210,9 @@ class VocabOptions(BaseModel):
 
 
 class WordLookupRequest(BaseModel):
+    session_id: str
+    uid: int
+    selected_text: str
     word: str
     lemma: str
     pos: str
@@ -218,6 +221,7 @@ class WordLookupRequest(BaseModel):
 
 
 class WordLookupResponse(BaseModel):
+    id: str
     word: str
     lemma: str
     pos: str
@@ -226,6 +230,23 @@ class WordLookupResponse(BaseModel):
     definition: str
     example: str
     level: str
+
+
+class LookupResultResponse(BaseModel):
+    id: str
+    uid: int
+    selectedText: str
+    partOfSpeech: str
+    lemma: str
+    requestedOptions: dict[str, bool]
+    translation: str
+    definition: str
+    example: str
+    level: str
+    error: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 # ── Comprehension Schemas ──────────────────────────────────────────────────────
 
@@ -295,3 +316,4 @@ class TranslationSessionDetailResponse(BaseModel):
     createdAt:      datetime
     updatedAt:      datetime
     translations:   List[SentenceTranslationResponse]
+    lookupResults:  List[LookupResultResponse]

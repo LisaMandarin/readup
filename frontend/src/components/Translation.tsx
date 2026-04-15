@@ -9,23 +9,15 @@ import useTranslationLookup from './useTranslationLookup'
 import targetLanguageNames from '../data/targetLanguageNames.json'
 import popupCopyByLanguage from '../data/popupCopyByLanguage'
 import type { TranslationRecord } from '../types/translation'
+import type { LookupResult } from './translationLookup'
 
 type Props = {
   translations: TranslationRecord[]
+  initialLookupResults: LookupResult[]
 }
 
 export default function Translation(props: Props) {
-  const { translations } = props
-  const firstTranslation = translations[0]
-
-  if (!firstTranslation) {
-    return null
-  }
-
-  const targetLanguage = firstTranslation.targetLanguage
-  const languageLabel =
-    targetLanguageNames[targetLanguage].targetLanguageName
-  const popupCopy = popupCopyByLanguage[targetLanguage]
+  const { translations, initialLookupResults } = props
   const {
     popup,
     popupRef,
@@ -40,7 +32,18 @@ export default function Translation(props: Props) {
     handleSentenceSelection,
   } = useTranslationLookup({
     translations,
+    initialLookupResults,
   })
+  const firstTranslation = translations[0]
+
+  if (!firstTranslation) {
+    return null
+  }
+
+  const targetLanguage = firstTranslation.targetLanguage
+  const languageLabel =
+    targetLanguageNames[targetLanguage].targetLanguageName
+  const popupCopy = popupCopyByLanguage[targetLanguage]
   const popupMetadata = popup
     ? getLookupMetadata(translations, popup.uid, popup.selectedText)
     : null

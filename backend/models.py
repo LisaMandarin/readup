@@ -100,6 +100,12 @@ class TranslationSession(Base):
         order_by="SentenceTranslation.uid",
         cascade="all, delete-orphan",
     )
+    lookup_results = relationship(
+        "LookupResult",
+        back_populates="session",
+        order_by="LookupResult.created_at",
+        cascade="all, delete-orphan",
+    )
 
 
 class SentenceTranslation(Base):
@@ -118,3 +124,30 @@ class SentenceTranslation(Base):
     )
 
     session = relationship("TranslationSession", back_populates="translations")
+
+
+class LookupResult(Base):
+    __tablename__ = "lookup_results"
+
+    id = Column(String(255), primary_key=True, index=True)
+    uid = Column(Integer, nullable=False)
+    selected_text = Column(Text, nullable=False)
+    part_of_speech = Column(String(100), nullable=False)
+    lemma = Column(String(255), nullable=False)
+    requested_options = Column(JSON, nullable=False)
+    translation = Column(Text, nullable=False, default="")
+    definition = Column(Text, nullable=False, default="")
+    example = Column(Text, nullable=False, default="")
+    level = Column(String(50), nullable=False, default="")
+    error = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    session_id = Column(
+        String(64),
+        ForeignKey("translation_sessions.session_id"),
+        nullable=False,
+    )
+
+    session = relationship("TranslationSession", back_populates="lookup_results")

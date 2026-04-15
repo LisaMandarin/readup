@@ -4,6 +4,7 @@ import Passage from '../components/Passage'
 import LookupInstructions from '../components/LookupInstructions'
 import type { TranslationRecord } from '../types/translation'
 import Translation from '../components/Translation'
+import type { LookupResult } from '../components/translationLookup'
 
 type MainContentColumnProps = {
   passage: string
@@ -12,6 +13,7 @@ type MainContentColumnProps = {
   onTranslate: () => void
   onClear: () => void
   translations: TranslationRecord[]
+  lookupResults: LookupResult[]
   isTranslating: boolean
   translateError: string | null
 }
@@ -59,7 +61,10 @@ export default function MainContent(props: MainContentColumnProps) {
       )}
 
       {/* Displays translated results */}
-      <Translation translations={props.translations} />
+      <Translation
+        translations={props.translations}
+        initialLookupResults={props.lookupResults}
+      />
 
       {/* Explains how the future lookup flow will work */}
       {props.translations.length > 0 && (
