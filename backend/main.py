@@ -1,5 +1,10 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+load_dotenv()
 
 from database import Base, engine
 from routers.auth_router import router as auth_router
@@ -12,9 +17,14 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ReadUp Backend", version="0.1.0")
 
+cors_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173",
+)
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    origin.strip()
+    for origin in cors_origins.split(",")
+    if origin.strip()
 ]
 
 app.add_middleware(
