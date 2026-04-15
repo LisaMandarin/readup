@@ -31,6 +31,7 @@ export default function Translation(props: Props) {
     popupRef,
     lookupOptions,
     lookupResults,
+    isLookingUp,
     canLookUp,
     closePopup,
     handleLookupOptionChange,
@@ -39,7 +40,6 @@ export default function Translation(props: Props) {
     handleSentenceSelection,
   } = useTranslationLookup({
     translations,
-    popupCopy,
   })
   const popupMetadata = popup
     ? getLookupMetadata(translations, popup.uid, popup.selectedText)
@@ -72,7 +72,8 @@ export default function Translation(props: Props) {
           onOptionChange={handleLookupOptionChange}
           onClose={closePopup}
           onLookUp={handleLookUp}
-          canLookUp={canLookUp}
+          canLookUp={canLookUp && !isLookingUp}
+          isLookingUp={isLookingUp}
         />
       )}
     </Card>

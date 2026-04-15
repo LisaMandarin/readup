@@ -1,18 +1,9 @@
-import spacy
-
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from language_tools import nlp
 from models import SentenceTranslation, TranslationSession
 from schemas import SentenceTranslationResponse, VocabItem
-
-
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    raise RuntimeError(
-        "spaCy model not found. Run: python -m spacy download en_core_web_sm"
-    )
 
 
 def extract_vocab_items(sentence: str) -> list[VocabItem]:

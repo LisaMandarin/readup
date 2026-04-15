@@ -1,4 +1,3 @@
-import type { PopupCopy } from '../data/popupCopyByLanguage'
 import type { TranslationRecord } from '../types/translation'
 
 export type PopupState = {
@@ -22,7 +21,12 @@ export type LookupResult = {
   selectedText: string
   partOfSpeech: string
   lemma: string
-  enabledOptions: string[]
+  requestedOptions: LookupOptionsState
+  translation: string
+  definition: string
+  example: string
+  level: string
+  error?: string
 }
 
 export const defaultLookupOptions: LookupOptionsState = {
@@ -72,16 +76,15 @@ export const getLookupMetadata = (
   }
 }
 
-export const getEnabledOptions = (
-  lookupOptions: LookupOptionsState,
-  popupCopy: PopupCopy
-) =>
-  (Object.entries(lookupOptions) as Array<[LookupOptionKey, boolean]>)
-    .filter(([, isEnabled]) => isEnabled)
-    .map(([option]) => popupCopy[option])
-
 export const hasEnabledLookupOptions = (lookupOptions: LookupOptionsState) =>
   Object.values(lookupOptions).some(Boolean)
+
+export const toVocabOptionsRequest = (lookupOptions: LookupOptionsState) => ({
+  translation: lookupOptions.targetLanguageTranslation,
+  definition: lookupOptions.englishDefinition,
+  example: lookupOptions.exampleSentence,
+  level: lookupOptions.cefrLevel,
+})
 
 export const getLookupResultId = (uid: number, selectedText: string) =>
   `${uid}-${normalizeToken(selectedText) || selectedText.trim().toLowerCase()}`

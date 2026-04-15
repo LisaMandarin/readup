@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { PopupCopy } from '../data/popupCopyByLanguage'
+import { fetchWordLookup } from '../api/lookup'
 import type { TranslationRecord } from '../types/translation'
 import {
   defaultLookupOptions,
   getLookupResultId,
-  getEnabledOptions,
   getLookupMetadata,
   hasEnabledLookupOptions,
+  toVocabOptionsRequest,
   type LookupOptionKey,
   type LookupOptionsState,
   type LookupResult,
@@ -16,15 +16,15 @@ import {
 
 type Params = {
   translations: TranslationRecord[]
-  popupCopy: PopupCopy
 }
 
 export default function useTranslationLookup(params: Params) {
-  const { translations, popupCopy } = params
+  const { translations } = params
   const [popup, setPopup] = useState<PopupState | null>(null)
   const [lookupOptions, setLookupOptions] =
     useState<LookupOptionsState>(defaultLookupOptions)
   const [lookupResults, setLookupResults] = useState<LookupResult[]>([])
+  const [isLookingUp, setIsLookingUp] = useState(false)
   const popupRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function useTranslationLookup(params: Params) {
     setLookupResults((current) => current.filter((result) => result.id !== id))
   }
 
-  const handleLookUp = () => {
+  const handleLookUp = async () => {
     if (!popup || !hasEnabledLookupOptions(lookupOptions)) {
       return
     }
@@ -85,29 +85,79 @@ export default function useTranslationLookup(params: Params) {
       popup.selectedText
     )
     const resultId = getLookupResultId(popup.uid, popup.selectedText)
-    const nextResult = {
-      uid: popup.uid,
-      id: resultId,
-      selectedText: popup.selectedText,
-      partOfSpeech,
-      lemma,
-      enabledOptions: getEnabledOptions(lookupOptions, popupCopy),
+    const targetLanguage = translations[0]?.targetLanguage
+    const requestedOptions = { ...lookupOptions }
+
+    if (!targetLanguage) {
+      return
     }
 
-    setLookupResults((current) => {
-      const existingIndex = current.findIndex((result) => result.id === resultId)
+    setIsLookingUp(true)
 
-      if (existingIndex === -1) {
-        return [...current, nextResult]
+    try {
+      const response = await fetchWordLookup({
+        word: popup.selectedText,
+        lemma,
+        pos: partOfSpeech,
+        target_language: targetLanguage,
+        options: toVocabOptionsRequest(requestedOptions),
+      })
+
+      const nextResult: LookupResult = {
+        uid: popup.uid,
+        id: resultId,
+        selectedText: popup.selectedText,
+        partOfSpeech,
+        lemma,
+        requestedOptions,
+        translation: response.translation,
+        definition: response.definition,
+        example: response.example,
+        level: response.level,
       }
 
-      return current.map((result, index) =>
-        index === existingIndex ? nextResult : result
-      )
-    })
+      setLookupResults((current) => {
+        const existingIndex = current.findIndex((result) => result.id === resultId)
 
-    window.getSelection()?.removeAllRanges()
-    setPopup(null)
+        if (existingIndex === -1) {
+          return [...current, nextResult]
+        }
+
+        return current.map((result, index) =>
+          index === existingIndex ? nextResult : result
+        )
+      })
+      window.getSelection()?.removeAllRanges()
+      setPopup(null)
+    } catch (error) {
+      const nextResult: LookupResult = {
+        uid: popup.uid,
+        id: resultId,
+        selectedText: popup.selectedText,
+        partOfSpeech,
+        lemma,
+        requestedOptions,
+        translation: '',
+        definition: '',
+        example: '',
+        level: '',
+        error: error instanceof Error ? error.message : 'Lookup failed.',
+      }
+
+      setLookupResults((current) => {
+        const existingIndex = current.findIndex((result) => result.id === resultId)
+
+        if (existingIndex === -1) {
+          return [...current, nextResult]
+        }
+
+        return current.map((result, index) =>
+          index === existingIndex ? nextResult : result
+        )
+      })
+    } finally {
+      setIsLookingUp(false)
+    }
   }
 
   const handleSentenceSelection = (uid: number) => {
@@ -169,6 +219,7 @@ export default function useTranslationLookup(params: Params) {
     popupRef,
     lookupOptions,
     lookupResults,
+    isLookingUp,
     canLookUp: hasEnabledLookupOptions(lookupOptions),
     closePopup,
     handleLookupOptionChange,

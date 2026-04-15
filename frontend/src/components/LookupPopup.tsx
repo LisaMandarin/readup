@@ -12,6 +12,7 @@ type Props = {
   lookupOptions: LookupOptionsState
   partOfSpeech: string
   canLookUp: boolean
+  isLookingUp: boolean
   onOptionChange: (option: LookupOptionKey) => void
   onClose: () => void
   onLookUp: () => void
@@ -25,6 +26,7 @@ export default function LookupPopup(props: Props) {
     lookupOptions,
     partOfSpeech,
     canLookUp,
+    isLookingUp,
     onOptionChange,
     onClose,
     onLookUp,
@@ -88,7 +90,7 @@ export default function LookupPopup(props: Props) {
           onClick={onLookUp}
           disabled={!canLookUp}
         >
-          {popupCopy.lookUp}
+          {isLookingUp ? 'Loading...' : popupCopy.lookUp}
         </button>
       </div>
     </div>

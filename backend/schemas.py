@@ -3,8 +3,7 @@
 import re
 from datetime import datetime
 from typing import Optional, List
-from enum import Enum
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 # ── Auth Schemas ───────────────────────────────────────────────────────────────
@@ -191,27 +190,42 @@ class TranslateOnlyResponse(BaseModel):
         from_attributes = True
 
 
-# ── Lookup Schemas ─────────────────────────────────────────────────────────────
-
-class LookupType(str, Enum):
-    english_definition  = "english_definition"
-    spanish_translation = "spanish_translation"
-    example_sentence    = "example_sentence"
-    cefr_level          = "cefr_level"
+class VocabOptions(BaseModel):
+    translation: bool = Field(
+        default=False,
+        description="Include translation of the word",
+    )
+    definition: bool = Field(
+        default=False,
+        description="Include English definition",
+    )
+    example: bool = Field(
+        default=False,
+        description="Include one natural example sentence",
+    )
+    level: bool = Field(
+        default=False,
+        description="Include approximate CEFR level A1-C2",
+    )
 
 
 class WordLookupRequest(BaseModel):
-    word:            str
-    context:         Optional[str] = None
-    lookup_type:     LookupType
-    target_language: str = "spanish"
+    word: str
+    lemma: str
+    pos: str
+    target_language: str
+    options: VocabOptions
 
 
 class WordLookupResponse(BaseModel):
-    word:        str
-    lookup_type: LookupType
-    result:      str
-
+    word: str
+    lemma: str
+    pos: str
+    target_language: str
+    translation: str
+    definition: str
+    example: str
+    level: str
 
 # ── Comprehension Schemas ──────────────────────────────────────────────────────
 

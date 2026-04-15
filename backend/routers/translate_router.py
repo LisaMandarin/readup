@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from auth import get_current_user
 from database import get_db
+from language_tools import get_target_language_code, nlp
 from models import User, TranslationSession, SentenceTranslation
 from schemas import (
     TranslateRequest,
@@ -16,19 +17,9 @@ from schemas import (
 from translation_sessions import (
     build_sentence_response,
     extract_vocab_items,
-    nlp,
 )
 
 router = APIRouter(prefix="/api/translate", tags=["Translation"])
-
-LANG_CODE_MAP = {
-    "spanish":    "es",
-    "french":     "fr",
-    "chinese":    "zh-CN",
-    "german":     "de",
-    "portuguese": "pt",
-    "japanese":   "ja",
-}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -55,13 +46,7 @@ def split_sentences(text: str) -> list[str]:
 
 def translate_sentence(sentence: str, target_language: str) -> str:
     """Translate a single sentence using GoogleTranslator."""
-    lang_code = LANG_CODE_MAP.get(target_language)
-
-    if not lang_code:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"No language code mapping for: '{target_language}'",
-        )
+    lang_code = get_target_language_code(target_language)
 
     try:
         translator = GoogleTranslator(source="en", target=lang_code)

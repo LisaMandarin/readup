@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
-from models import ReadingSession
 from schemas import (
     SignUpRequest,
     SignInRequest,
